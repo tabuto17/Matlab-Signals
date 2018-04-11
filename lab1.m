@@ -9,15 +9,16 @@ system=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
 switch system
     
     case 'P'
-       Ssystem=input('Ingrese la cantidad de subsistemas a examinar: ');
-       Den=cell(Ssystem,1);
-       Num=cell(Ssystem,1);
-       Nums=cell(Ssystem,1);
-       Dens=cell(Ssystem,1);
-       Hs=cell(Ssystem,1);
+       Ssys=input('Ingrese la cantidad de subsistemas a examinar: ');
+       Den=cell(Ssys,1);
+       Num=cell(Ssys,1);
+       Nums=cell(Ssys,1);
+       Dens=cell(Ssys,1);
+       Hs=cell(Ssys,1);
        %ht=cell(Ssystem,1);
-       syms x(s) y(s)
-       for W=1:Ssystem
+       syms x(s) y(s) % variables simbolicas
+       
+       for W=1:Ssys
            Num{W}=input(['Ingrese el numerador ',num2str(W),' en forma de vector:']);
            Den{W}=input(['Ingrese el denominador ',num2str(W),' en forma de vector:']);
            Nums{W}=poly2sym([Num{W}],s);
@@ -25,17 +26,22 @@ switch system
            Hs{W}=Nums{W}/Dens{W};
            ht=ilaplace(Hs{W})
        end
-       
+            
+       H=0;
+       for i=1:Ssys;
+           H(i+0)= H(i)+Hs{W}
+       end
+      
     case 'S'
-       Ssystem=input('Ingrese la cantidad de subsistemas a examinar: ');
-       Den=cell(Ssystem,1);
-       Num=cell(Ssystem,1);
-       Nums=cell(Ssystem,1);
-       Dens=cell(Ssystem,1);
-       Hs=cell(Ssystem,1);
+       Ssys=input('Ingrese la cantidad de subsistemas a examinar: ');
+       Den=cell(Ssys,1);
+       Num=cell(Ssys,1);
+       Nums=cell(Ssys,1);
+       Dens=cell(Ssys,1);
+       Hs=cell(Ssys,1);
        %ht=cell(Ssistem,1);
        syms x(s) y(s)
-        for W=1:Ssystem
+        for W=1:Ssys
             Num{W}=input(['Ingrese el numerador ',num2str(W),' en forma de vector:']);
             Den{W}=input(['Ingrese el denominador ',num2str(W),' en forma de vector:']);
             Nums{W}=poly2sym([Num{W}],s);
