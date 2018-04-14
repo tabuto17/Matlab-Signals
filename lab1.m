@@ -41,7 +41,7 @@ switch system
         denTfun=sym2poly(denTfun);
         
         A=input('Ingrese el vector de entrada arbitraria: ');
-                      
+        
         subplot(311)
         Tfun=tf(numTfun,denTfun); %transfer
         R=impulse(Tfun,t);
@@ -51,7 +51,8 @@ switch system
         plot(t,Res)
         subplot(313)
         Ans=conv(A,R);
-        plot(t,Ans)
+        t1=linspace(0,10,length(Ans));
+        plot(t1,Ans)
         
         
     case {'S','s'}
@@ -68,6 +69,8 @@ switch system
             Den{W}=input(['Ingrese coeficientes del denominador del sistema ',num2str(W),' en forma de vector:']);
             Nums{W}=poly2sym([Num{W}],s);
             Dens{W}=poly2sym([Den{W}],s);
+            N=Num{W};
+            D=Den{W};
             Hs{W}=Nums{W}/Dens{W};
             nu=Num{W};
             
@@ -75,10 +78,29 @@ switch system
             ht=ilaplace(Hs{W})
         end
         
-        HS=1;
+        HS1=1;
         for W=1:Sys;
-            HS=HS*ht;
+            HS1=conv(HS1,Num{W});
         end
+        
+        HS2=1;
+        for W=1:Sys;
+            HS2=conv(HS2,Den{W});
+        end
+        
+        A=input('Ingrese el vector de entrada arbitraria: ');
+        
+        subplot(311)
+        km=tf(HS1,HS2)
+        R=impulse(km,t);
+        plot(t,R)
+        %         subplot(312)
+        %         Res=step(Tfun,t);
+        %         plot(t,Res)
+        %         subplot(313)
+        %         Ans=conv(A,R);
+        %         t1=linspace(0,10,length(Ans));
+        %         plot(t1,Ans)
         
     otherwise
         disp ('Sistema no identificado')
