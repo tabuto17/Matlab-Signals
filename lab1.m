@@ -1,11 +1,7 @@
-% Christian Camilo Gaviria Castro - C.C.
-% Julian Castrillón García - C.C.
-% Brahian Steven Cortés - C.C.
-
 clc,clearvars,clear workspace, close all
 
 system=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
-t=linspace(0,10); %si se deben definir los saltos ?
+t=linspace(0,10);
 
 switch system
     
@@ -16,7 +12,7 @@ switch system
         Nums=cell(Sys,1);
         Dens=cell(Sys,1);
         Hs=cell(Sys,1);
-        syms x(s) y(s) % variables simbólicas
+        syms s % variables simbólicas
         
         for W=1:Sys;
             Num{W}=input(['Ingrese coeficientes del numerador del sistema ',num2str(W),' en forma de vector:']);
@@ -42,18 +38,34 @@ switch system
         
         A=input('Ingrese el vector de entrada arbitraria: ');
         
+        Poc=roots(Tfun); %Polos del sistema
+        R=real(Poc); I=imag(Poc);
+        II=find(I~=0); %encontrar los imaginarios diferentes de 0
+        if sum(I)~=0 && (R<0)
+            disp('Sistema Estable !')
+        elseif isempty(II) && (R<0) %Determine whether array is empty
+            disp('Sistema Estable !')
+        elseif (R>0);
+            disp('Sistema Inestable !')
+        elseif sum(I)==0;
+            disp('Sistema Marginalmente Estable !')
+        elseif (R<=0);
+            disp('Sistema Estable !')
+        else
+            disp('Sistema Inestable !')
+        end
+        
         subplot(311)
         Tfun=tf(numTfun,denTfun); %transfer
-        R=impulse(Tfun,t);
-        plot(t,R)
+        R2=impulse(Tfun,t);
+        plot(t,R2)
         subplot(312)
         Res=step(Tfun,t);
         plot(t,Res)
         subplot(313)
-        Ans=conv(A,R);
+        Ans=conv(A,R2);
         t1=linspace(0,10,length(Ans));
         plot(t1,Ans)
-        
         
     case {'S','s'}
         Sys=input('Ingrese la cantidad de subsistemas a examinar: ');
@@ -62,7 +74,7 @@ switch system
         Nums=cell(Sys,1);
         Dens=cell(Sys,1);
         Hs=cell(Sys,1);
-        syms x(s) y(s)
+        syms s
         
         for W=1:Sys;
             Num{W}=input(['Ingrese coeficientes del numerador del sistema ',num2str(W),' en forma de vector:']);
@@ -72,10 +84,10 @@ switch system
             N=Num{W};
             D=Den{W};
             Hs{W}=Nums{W}/Dens{W};
-            nu=Num{W};
+            ht=ilaplace(Hs{W})
             
             disp(['Esta es la respuesta al impulso ', num2str(W),':'])
-            ht=ilaplace(Hs{W})
+            
         end
         
         HS1=1;
@@ -88,20 +100,20 @@ switch system
             HS2=conv(HS2,Den{W});
         end
         
-        A=input('Ingrese el vector de entrada arbitraria: ');
+        B=input('Ingrese el vector de entrada arbitraria: ');
         
+        km=tf(HS1,HS2);
+        R3=impulse(km,t);
         subplot(311)
-        km=tf(HS1,HS2)
-        R=impulse(km,t);
-        plot(t,R)
-        %         subplot(312)
-        %         Res=step(Tfun,t);
-        %         plot(t,Res)
-        %         subplot(313)
-        %         Ans=conv(A,R);
-        %         t1=linspace(0,10,length(Ans));
-        %         plot(t1,Ans)
+        plot(t,R3)
+        subplot(312)
+        Res2=step(km,t);
+        plot(t,Res2)
+        subplot(313)
+        Ans2=conv(B,R3);
+        t2=linspace(0,10,length(Ans2));
+        plot(t2,Ans2)
         
     otherwise
-        disp ('Sistema no identificado')
+        disp ('Sistema no identificado.')
 end
