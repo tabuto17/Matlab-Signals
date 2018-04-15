@@ -14,7 +14,7 @@ switch system
         Hs=cell(Sys,1);
         syms s % variables simbólicas
         
-        for W=1:Sys;
+        for W=1:Sys
             Num{W}=input(['Ingrese coeficientes del numerador del sistema ',num2str(W),' en forma de vector:']);
             Den{W}=input(['Ingrese coeficientes del denominador del sistema ',num2str(W),' en forma de vector:']);
             Nums{W}=poly2sym([Num{W}],s);
@@ -36,24 +36,7 @@ switch system
         numTfun=sym2poly(numTfun);
         denTfun=sym2poly(denTfun);
         
-        A=input('Ingrese el vector de entrada arbitraria: ');
-        
-        Poc=roots(Tfun); %Polos del sistema
-        R=real(Poc); I=imag(Poc);
-        II=find(I~=0); %encontrar los imaginarios diferentes de 0
-        if sum(I)~=0 && (R<0)
-            disp('Sistema Estable !')
-        elseif isempty(II) && (R<0) %Determine whether array is empty
-            disp('Sistema Estable !')
-        elseif (R>0);
-            disp('Sistema Inestable !')
-        elseif sum(I)==0;
-            disp('Sistema Marginalmente Estable !')
-        elseif (R<=0);
-            disp('Sistema Estable !')
-        else
-            disp('Sistema Inestable !')
-        end
+        A=input('Ingrese el vector de entrada arbitraria: ')
         
         subplot(311)
         Tfun=tf(numTfun,denTfun); %transfer
@@ -67,6 +50,22 @@ switch system
         t1=linspace(0,10,length(Ans));
         plot(t1,Ans)
         
+        Poc=roots(denTfun); %Polos del sistema
+        R=real(Poc); I=imag(Poc);
+        if sum(I)~=0 && (R<0)
+            disp('Sistema Estable !')
+        elseif isempty(I) && (R<0) %Determine whether array is empty
+            disp('Sistema Estable !')
+        elseif (R>0)
+            disp('Sistema Inestable !')
+        elseif sum(I)==0
+            disp('Sistema Marginalmente Estable !')
+        elseif (R<=0)
+            disp('Sistema Estable !')
+        else
+            disp('Sistema Inestable !')
+        end
+        
     case {'S','s'}
         Sys=input('Ingrese la cantidad de subsistemas a examinar: ');
         Den=cell(Sys,1);
@@ -76,7 +75,7 @@ switch system
         Hs=cell(Sys,1);
         syms s
         
-        for W=1:Sys;
+        for W=1:Sys
             Num{W}=input(['Ingrese coeficientes del numerador del sistema ',num2str(W),' en forma de vector:']);
             Den{W}=input(['Ingrese coeficientes del denominador del sistema ',num2str(W),' en forma de vector:']);
             Nums{W}=poly2sym([Num{W}],s);
@@ -91,12 +90,10 @@ switch system
         end
         
         HS1=1;
-        for W=1:Sys;
-            HS1=conv(HS1,Num{W});
-        end
-        
         HS2=1;
-        for W=1:Sys;
+        
+        for W=1:Sys
+            HS1=conv(HS1,Num{W});
             HS2=conv(HS2,Den{W});
         end
         
@@ -114,6 +111,23 @@ switch system
         t2=linspace(0,10,length(Ans2));
         plot(t2,Ans2)
         
+        Poc=roots(R3); %Polos del sistema
+        R=real(Poc); I=imag(Poc);
+        if sum(I)~=0 && (R<0)
+            disp('Sistema Estable !')
+        elseif isempty(I) && (R<0) %Determine whether array is empty
+            disp('Sistema Estable !')
+        elseif (R>0)
+            disp('Sistema Inestable !')
+        elseif sum(I)==0
+            disp('Sistema Marginalmente Estable !')
+        elseif (R<=0)
+            disp('Sistema Estable !')
+        else
+            disp('Sistema Inestable !')
+        end
+        
     otherwise
         disp ('Sistema no identificado.')
 end
+
