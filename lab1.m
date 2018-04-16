@@ -1,130 +1,132 @@
+% Christian Camilo Gaviria Castro - C.C. 1017229318
+% Julian Castrillón García - C.C. 1216719761
+% Brahian Steven Cortés - C.C. 1020440471
+
 clc,clearvars,clear workspace, close all
 
-system=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
+Sys=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
 t=linspace(0,10);
 
-switch system
+switch Sys
     
     case {'P','p'}
-        Sys=input('Ingrese la cantidad de subsistemas a analizar: ');
-        Den=cell(Sys,1);
-        Num=cell(Sys,1);
-        Nums=cell(Sys,1);
-        Dens=cell(Sys,1);
-        Hs=cell(Sys,1);
-        syms s % variables simbólicas
+        N=input('Ingrese la cantidad de subsistemas a analizar: ');
+        Den=cell(N,1);
+        Num=cell(N,1);
+        Nums=cell(N,1);
+        Dens=cell(N,1);
+        Hs=cell(N,1);
+        syms s %variable simbólica
         
-        for W=1:Sys
-            Num{W}=input(['Ingrese coeficientes del numerador del sistema ',num2str(W),' en forma de vector:']);
-            Den{W}=input(['Ingrese coeficientes del denominador del sistema ',num2str(W),' en forma de vector:']);
-            Nums{W}=poly2sym([Num{W}],s); %La syntax que debe de llevar la función de transferencia con respecto a s
-            Dens{W}=poly2sym([Den{W}],s); %de vectorial a polinomica
-            Hs{W}=Nums{W}/Dens{W};
-            disp(['Esta es la respuesta al impulso ', num2str(W),':'])
-            ht=ilaplace(Hs{W})
-            %pretty(ht)
+        for i=1:N
+            Num{i}=input(['Ingrese coeficientes del numerador del sistema ',num2str(i),' en forma de vector:']);
+            Den{i}=input(['Ingrese coeficientes del denominador del sistema ',num2str(i),' en forma de vector:']);
+            Nums{i}=poly2sym([Num{i}],s); %de vectorial a polinómica
+            Dens{i}=poly2sym([Den{i}],s);
+            Hs{i}=Nums{i}/Dens{i};
+            disp(['Esta es la respuesta al impulso ', num2str(i),':'])
+            ht=ilaplace(Hs{i})
         end
         
-        Tfun=0;
-        for W=1:Sys
-            Tfun=Tfun+Hs{W};
+        f=0;
+        for i=1:N
+            f=f+Hs{i};
         end
-        disp('Sistema de transferencia total: ')
-        Tfun
         
-        [numTfun,denTfun]=numden(Tfun);
-        numTfun=sym2poly(numTfun);
-        denTfun=sym2poly(denTfun);
+        [numf,denf]=numden(f);
+        numf=sym2poly(numf); %sobreescribir en un vector.
+        denf=sym2poly(denf);
         
-        A=input('Ingrese el vector de entrada arbitraria: ')
+        A=input('Ingrese el vector de entrada arbitraria: ');
         
         subplot(311)
-        Tfun=tf(numTfun,denTfun); %transfer
-        R2=impulse(Tfun,t);
-        plot(t,R2)
+        Tf=tf(numf,denf);
+        xlabel 'Armónico',ylabel 'tiempo'
+        title 'Respuesta al impulsos'
+        Im=impulse(Tf,t);
+        plot(t,Im)
+        grid on
         subplot(312)
-        Res=step(Tfun,t);
-        plot(t,Res)
+        St=step(Tf,t);
+        plot(t,St)
+        grid on
         subplot(313)
-        Ans=conv(A,R2);
-        t1=linspace(0,10,length(Ans));
-        plot(t1,Ans)
+        Co=conv(A,Im);
+        t1=linspace(0,10,length(Co));
+        plot(t1,Co)
+        grid on
         
-        Poc=roots(denTfun); %Raices del sistema
-        R=real(Poc); I=imag(Poc);
-        if sum(I)~=0 && (R<0)
-            disp('Sistema Estable !')
-        elseif isempty(I) && (R<0) %Determine whether array is empty
-            disp('Sistema Estable !')
-        elseif (R>0)
-            disp('Sistema Inestable !')
-        elseif sum(I)==0
-            disp('Sistema Marginalmente Estable !')
-        elseif (R<=0)
-            disp('Sistema Estable !')
-        else
-            disp('Sistema Inestable !')
+        Poc=roots(denf);
+        R=real(Poc);            I=imag(Poc);
+        RR=find(R>0);         II=find(I~=0);
+        Re=R(RR);               Im=I(II);        U=unique(Im);
+        
+        if isempty(R) && isempty(I)
+            disp('Error en el sistema ingresado, Ingrese nuevamente')
+        elseif (Re>0)
+            disp('Sistema Inestable')
+        elseif I==0 %cuando no hay imaginarios.
+            disp('Sistema Estable')
+        else sum(U)==0 %sumatoria de imaginarios repetidos.
+            disp('Sistema Marginalmente Estable')
         end
         
     case {'S','s'}
-        Sys=input('Ingrese la cantidad de subsistemas a examinar: ');
-        Den=cell(Sys,1);
-        Num=cell(Sys,1);
-        Nums=cell(Sys,1);
-        Dens=cell(Sys,1);
-        Hs=cell(Sys,1);
+        N=input('Ingrese la cantidad de subsistemas a examinar: ');
+        Den=cell(N,1);
+        Num=cell(N,1);
+        Nums=cell(N,1);
+        Dens=cell(N,1);
+        Hs=cell(N,1);
         syms s
         
-        for W=1:Sys
-            Num{W}=input(['Ingrese coeficientes del numerador del sistema ',num2str(W),' en forma de vector:']);
-            Den{W}=input(['Ingrese coeficientes del denominador del sistema ',num2str(W),' en forma de vector:']);
-            Nums{W}=poly2sym([Num{W}],s);
-            Dens{W}=poly2sym([Den{W}],s);
-            N=Num{W};
-            D=Den{W};
-            Hs{W}=Nums{W}/Dens{W};
-            ht=ilaplace(Hs{W})
-            
-            disp(['Esta es la respuesta al impulso ', num2str(W),':'])
-            
+        for i=1:N
+            Num{i}=input(['Ingrese coeficientes del numerador del sistema ',num2str(i),' en forma de vector:']);
+            Den{i}=input(['Ingrese coeficientes del denominador del sistema ',num2str(i),' en forma de vector:']);
+            Nums{i}=poly2sym([Num{i}],s);
+            Dens{i}=poly2sym([Den{i}],s);
+            %             N=Num{n};
+            %             D=Den{n};
+            Hs{i}=Nums{i}/Dens{i};
+            disp(['Esta es la respuesta al impulso ', num2str(i),':'])
+            ht=ilaplace(Hs{i})
         end
         
-        HS1=1;
-        HS2=1;
+        Hs1=1;
+        Hs2=1;
         
-        for W=1:Sys
-            HS1=conv(HS1,Num{W});
-            HS2=conv(HS2,Den{W});
+        for i=1:N
+            Hs1=conv(Hs1,Num{i}); %convolución entre los vectores de entrada
+            Hs2=conv(Hs2,Den{i});
         end
         
         B=input('Ingrese el vector de entrada arbitraria: ');
         
-        km=tf(HS1,HS2)
-        R3=impulse(km,t);
+        f=tf(Hs1,Hs2);
+        Im=impulse(f,t);
         subplot(311)
-        plot(t,R3)
+        plot(t,Im)
         subplot(312)
-        Res2=step(km,t);
-        plot(t,Res2)
+        St=step(f,t);
+        plot(t,St)
         subplot(313)
-        Ans2=conv(B,R3);
-        t2=linspace(0,10,length(Ans2));
-        plot(t2,Ans2)
+        Co=conv(B,Im);
+        t1=linspace(0,10,length(Co));
+        plot(t1,Co)
         
-        Poc=roots(R3); %Raíces del sistema
-        R=real(Poc); I=imag(Poc);
-        if sum(I)~=0 && (R<0)
-            disp('Sistema Estable !')
-        elseif isempty(I) && (R<0) %Determine whether array is empty
-            disp('Sistema Estable !')
-        elseif (R>0)
-            disp('Sistema Inestable !')
-        elseif sum(I)==0
-            disp('Sistema Marginalmente Estable !')
-        elseif (R<=0)
-            disp('Sistema Estable !')
-        else
-            disp('Sistema Inestable !')
+        Poc=pole(f);
+        R=real(Poc);            I=imag(Poc);
+        RR=find(R>0);         II=find(I~=0);
+        Re=R(RR);               Im=I(II);        U=unique(Im);
+        
+        if isempty(R) && isempty(I)
+            disp('Error en el sistema ingresado, Ingrese nuevamente')
+        elseif (Re>0)
+            disp('Sistema Inestable')
+        elseif I==0 %cuando no hay imaginarios.
+            disp('Sistema Estable')
+        else sum(U)==0 %sumatoria de imaginarios repetidos.
+            disp('Sistema Marginalmente Estable')
         end
         
     otherwise
