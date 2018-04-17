@@ -38,14 +38,16 @@ switch Sys
         denf=sym2poly(denf);
         
         A=input('Ingrese el vector de entrada arbitraria: ');
+        disp(' ');
+        disp(' ');
         
         subplot(311)
-        Tf=tf(numf,denf);
-        impulse(Tf,t), grid on
+        FT=tf(numf,denf);
+        impulse(FT,t), grid on
         subplot(312)
-        step(Tf,t), grid on
+        step(FT,t), grid on
         subplot(313)
-        Co=conv(A,impulse(Tf,t));
+        Co=conv(A,impulse(FT,t));
         t1=linspace(0,10,length(Co));
         plot(t1,Co), axis tight, grid on
         title 'Arbitrary Response'
@@ -57,11 +59,14 @@ switch Sys
         Re=R(RR);       Im=I(II);      U=unique(Im);
         
         if (Re>0)
-            disp('Sistema Global Inestable')
+            disp(['El sistema Global : ', evalc('FT')])
+            disp('Es Inestable')
         elseif I==0 %cuando no hay imaginarios.
-            disp('Sistema Global Estable')
+            disp(['El sistema Global : ', evalc('FT')])
+            disp('Es Estable')
         else sum(U)==0; %sumatoria de imaginarios repetidos.
-            disp('Sistema Global Marginalmente Estable')
+            disp(['El sistema Global : ', evalc('FT')])
+            disp('Es Marginalmente Estable')
         end
         
     case {'S','s'}
@@ -92,30 +97,35 @@ switch Sys
         end
         
         B=input('Ingrese el vector de entrada arbitraria: ');
+        disp(' ');
+        disp(' ');
         
-        f=tf(Hs1,Hs2);
+        FT=tf(Hs1,Hs2);
         subplot(311)
-        impulse(f,t), grid on
+        impulse(FT,t), grid on
         subplot(312)
-        step(f,t), grid on
+        step(FT,t), grid on
         subplot(313)
-        Co=conv(B,impulse(f,t));
+        Co=conv(B,impulse(FT,t));
         t1=linspace(0,10,length(Co));
         plot(t1,Co), axis tight, grid on
         title 'Arbitrary Response'
         xlabel 'Time(seconds)', ylabel 'Amplitude'
         
-        P=pole(f);
+        P=pole(FT);
         R=real(P);      I=imag(P);
         RR=find(R>0);   II=find(I~=0);
         Re=R(RR);       Im=I(II);       U=unique(Im);
         
         if (Re>0)
-            disp('Sistema Global Inestable')
+            disp(['El sistema Global : ', evalc('FT')])
+            disp('Es Inestable')
         elseif I==0 %cuando no hay imaginarios.
-            disp('Sistema Global Estable')
+            disp(['El sistema Global : ', evalc('FT')])
+            disp('Es Estable')
         else sum(U)==0; %sumatoria de imaginarios repetidos.
-            disp('Sistema Global Marginalmente Estable')
+            disp(['El sistema Global : ', evalc('FT')])
+            disp('Es Marginalmente Estable')
         end
         
     otherwise
