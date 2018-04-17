@@ -57,7 +57,7 @@ switch Sys
         Re=R(RR);       Im=I(II);      U=unique(Im);
         
         if (Re>0)
-            disp('Sistema GlobalInestable')
+            disp('Sistema Global Inestable')
         elseif I==0 %cuando no hay imaginarios.
             disp('Sistema Global Estable')
         else sum(U)==0; %sumatoria de imaginarios repetidos.
