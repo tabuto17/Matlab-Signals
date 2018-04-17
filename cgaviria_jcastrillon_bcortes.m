@@ -1,6 +1,6 @@
-% Christian Camilo Gaviria Castro
-% Julian Castrillón García
-% Brahian Steven Cortés
+% Christian Camilo Gaviria Castro - C.C. 1017229318
+% Julian Castrillón García - C.C. 1216719761
+% Brahian Steven Cortés - C.C. 1020440471
 
 clc,clear vars,clear workspace, close all
 
@@ -24,7 +24,7 @@ switch Sys
             Nums{i}=poly2sym([Num{i}],s); %de vectorial a polinómica
             Dens{i}=poly2sym([Den{i}],s);
             Hs{i}=Nums{i}/Dens{i};
-            disp(['Esta es la respuesta al impulso ', num2str(i),':'])
+            disp(['Respuesta al impulso ', num2str(i),':'])
             ht=ilaplace(Hs{i})
         end
         
@@ -57,11 +57,11 @@ switch Sys
         Re=R(RR);       Im=I(II);      U=unique(Im);
         
         if (Re>0)
-            disp('Sistema Inestable')
+            disp('Sistema GlobalInestable')
         elseif I==0 %cuando no hay imaginarios.
-            disp('Sistema Estable')
-        else sum(U)==0 %sumatoria de imaginarios repetidos.
-            disp('Sistema Marginalmente Estable')
+            disp('Sistema Global Estable')
+        else sum(U)==0; %sumatoria de imaginarios repetidos.
+            disp('Sistema Global Marginalmente Estable')
         end
         
     case {'S','s'}
@@ -79,7 +79,7 @@ switch Sys
             Nums{i}=poly2sym([Num{i}],s);
             Dens{i}=poly2sym([Den{i}],s);
             Hs{i}=Nums{i}/Dens{i};
-            disp(['Esta es la respuesta al impulso ', num2str(i),':'])
+            disp(['Respuesta al impulso ', num2str(i),':'])
             ht=ilaplace(Hs{i})
         end
         
@@ -111,11 +111,11 @@ switch Sys
         Re=R(RR);       Im=I(II);       U=unique(Im);
         
         if (Re>0)
-            disp('Sistema Inestable')
+            disp('Sistema Global Inestable')
         elseif I==0 %cuando no hay imaginarios.
-            disp('Sistema Estable')
-        else sum(U)==0 %sumatoria de imaginarios repetidos.
-            disp('Sistema Marginalmente Estable')
+            disp('Sistema Global Estable')
+        else sum(U)==0; %sumatoria de imaginarios repetidos.
+            disp('Sistema Global Marginalmente Estable')
         end
         
     otherwise
