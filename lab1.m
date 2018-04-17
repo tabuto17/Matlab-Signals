@@ -1,8 +1,8 @@
-% Christian Camilo Gaviria Castro - C.C. 1017229318
-% Julian Castrillón García - C.C. 1216719761
-% Brahian Steven Cortés - C.C. 1020440471
+% Christian Camilo Gaviria Castro
+% Julian Castrillón García
+% Brahian Steven Cortés
 
-clc,clearvars,clear workspace, close all
+clc,clear vars,clear workspace, close all
 
 Sys=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
 t=linspace(0,10);
@@ -34,36 +34,29 @@ switch Sys
         end
         
         [numf,denf]=numden(f);
-        numf=sym2poly(numf); %sobreescribir en un vector.
+        numf=sym2poly(numf); %sobreescribir la variable en un vector.
         denf=sym2poly(denf);
         
         A=input('Ingrese el vector de entrada arbitraria: ');
         
         subplot(311)
         Tf=tf(numf,denf);
-        xlabel 'Armónico',ylabel 'tiempo'
-        title 'Respuesta al impulsos'
-        Im=impulse(Tf,t);
-        plot(t,Im)
-        grid on
+        impulse(Tf,t), grid on
         subplot(312)
-        St=step(Tf,t);
-        plot(t,St)
-        grid on
+        step(Tf,t), grid on
         subplot(313)
-        Co=conv(A,Im);
+        Co=conv(A,impulse(Tf,t));
         t1=linspace(0,10,length(Co));
-        plot(t1,Co)
-        grid on
+        plot(t1,Co), axis tight, grid on
+        title 'Arbitrary Response'
+        xlabel 'Time(seconds)', ylabel 'Amplitude'
         
-        Poc=roots(denf);
-        R=real(Poc);            I=imag(Poc);
-        RR=find(R>0);         II=find(I~=0);
-        Re=R(RR);               Im=I(II);        U=unique(Im);
+        P=roots(denf);
+        R=real(P);      I=imag(P);
+        RR=find(R>0);   II=find(I~=0);
+        Re=R(RR);       Im=I(II);      U=unique(Im);
         
-        if isempty(R) && isempty(I)
-            disp('Error en el sistema ingresado, Ingrese nuevamente')
-        elseif (Re>0)
+        if (Re>0)
             disp('Sistema Inestable')
         elseif I==0 %cuando no hay imaginarios.
             disp('Sistema Estable')
@@ -85,8 +78,6 @@ switch Sys
             Den{i}=input(['Ingrese coeficientes del denominador del sistema ',num2str(i),' en forma de vector:']);
             Nums{i}=poly2sym([Num{i}],s);
             Dens{i}=poly2sym([Den{i}],s);
-            %             N=Num{n};
-            %             D=Den{n};
             Hs{i}=Nums{i}/Dens{i};
             disp(['Esta es la respuesta al impulso ', num2str(i),':'])
             ht=ilaplace(Hs{i})
@@ -103,25 +94,23 @@ switch Sys
         B=input('Ingrese el vector de entrada arbitraria: ');
         
         f=tf(Hs1,Hs2);
-        Im=impulse(f,t);
         subplot(311)
-        plot(t,Im)
+        impulse(f,t), grid on
         subplot(312)
-        St=step(f,t);
-        plot(t,St)
+        step(f,t), grid on
         subplot(313)
-        Co=conv(B,Im);
+        Co=conv(B,impulse(f,t));
         t1=linspace(0,10,length(Co));
-        plot(t1,Co)
+        plot(t1,Co), axis tight, grid on
+        title 'Arbitrary Response'
+        xlabel 'Time(seconds)', ylabel 'Amplitude'
         
-        Poc=pole(f);
-        R=real(Poc);            I=imag(Poc);
-        RR=find(R>0);         II=find(I~=0);
-        Re=R(RR);               Im=I(II);        U=unique(Im);
+        P=pole(f);
+        R=real(P);      I=imag(P);
+        RR=find(R>0);   II=find(I~=0);
+        Re=R(RR);       Im=I(II);       U=unique(Im);
         
-        if isempty(R) && isempty(I)
-            disp('Error en el sistema ingresado, Ingrese nuevamente')
-        elseif (Re>0)
+        if (Re>0)
             disp('Sistema Inestable')
         elseif I==0 %cuando no hay imaginarios.
             disp('Sistema Estable')
