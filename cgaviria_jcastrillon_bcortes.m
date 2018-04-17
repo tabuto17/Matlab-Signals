@@ -1,6 +1,6 @@
-% Christian Camilo Gaviria Castro - C.C. 1017229318
-% Julian Castrillón García - C.C. 1216719761
-% Brahian Steven Cortés - C.C. 1020440471
+% Christian Camilo Gaviria Castro
+% Julian Castrillón García
+% Brahian Steven Cortés
 
 clc,clear vars,clear workspace, close all
 
