@@ -2,7 +2,7 @@
 % Julian Castrillón García
 % Brahian Steven Cortés
 
-clc,clear vars,clear workspace, close all
+clc,clearvars,clear workspace, close all
 
 Sys=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
 t=linspace(0,10);
@@ -24,6 +24,7 @@ switch Sys
             Nums{i}=poly2sym([Num{i}],s); %de vectorial a polinómica
             Dens{i}=poly2sym([Den{i}],s);
             Hs{i}=Nums{i}/Dens{i};
+            disp(' ');
             disp(['Respuesta al impulso ', num2str(i),':'])
             ht=ilaplace(Hs{i})
         end
@@ -39,7 +40,6 @@ switch Sys
         
         A=input('Ingrese el vector de entrada arbitraria: ');
         disp(' ');
-        disp(' ');
         
         subplot(311)
         FT=tf(numf,denf);
@@ -53,20 +53,23 @@ switch Sys
         title 'Arbitrary Response'
         xlabel 'Time(seconds)', ylabel 'Amplitude'
         
-        P=roots(denf);
-        R=real(P);      I=imag(P);
+        Pol=roots(denf);  Pol=round(Pol,4);
+        R=real(Pol);      I=imag(Pol);
         RR=find(R>0);   II=find(I~=0);
-        Re=R(RR);       Im=I(II);      U=unique(Im);
+        Re=R(RR);       Im=I(II);      U=unique(Pol);
         
-        if (Re>0)
-            disp(['El sistema Global : ', evalc('FT')])
+        if length(Pol)>length(U)
+            disp(['El Sistema Global : ', evalc('FT')])
             disp('Es Inestable')
-        elseif I==0 %cuando no hay imaginarios.
-            disp(['El sistema Global : ', evalc('FT')])
-            disp('Es Estable')
-        else sum(U)==0; %sumatoria de imaginarios repetidos.
-            disp(['El sistema Global : ', evalc('FT')])
+        elseif (Re>0)
+            disp(['El Sistema Global : ', evalc('FT')])
+            disp('Es Inestable')
+        elseif sum((R)==0)>=1;
+            disp(['El Sistema Global : ', evalc('FT')])
             disp('Es Marginalmente Estable')
+        else
+            disp(['El Sistema Global : ', evalc('FT')])
+            disp('Es Estable')
         end
         
     case {'S','s'}
@@ -84,6 +87,7 @@ switch Sys
             Nums{i}=poly2sym([Num{i}],s);
             Dens{i}=poly2sym([Den{i}],s);
             Hs{i}=Nums{i}/Dens{i};
+            disp(' ');
             disp(['Respuesta al impulso ', num2str(i),':'])
             ht=ilaplace(Hs{i})
         end
@@ -98,7 +102,6 @@ switch Sys
         
         B=input('Ingrese el vector de entrada arbitraria: ');
         disp(' ');
-        disp(' ');
         
         FT=tf(Hs1,Hs2);
         subplot(311)
@@ -112,20 +115,23 @@ switch Sys
         title 'Arbitrary Response'
         xlabel 'Time(seconds)', ylabel 'Amplitude'
         
-        P=pole(FT);
-        R=real(P);      I=imag(P);
+        Pol=pole(FT);  Pol=round(Pol,4);
+        R=real(Pol);      I=imag(Pol);
         RR=find(R>0);   II=find(I~=0);
-        Re=R(RR);       Im=I(II);       U=unique(Im);
+        Re=R(RR);       Im=I(II);      U=unique(Pol);
         
-        if (Re>0)
-            disp(['El sistema Global : ', evalc('FT')])
+        if length(Pol)>length(U)
+            disp(['El Sistema Global : ', evalc('FT')])
             disp('Es Inestable')
-        elseif I==0 %cuando no hay imaginarios.
-            disp(['El sistema Global : ', evalc('FT')])
-            disp('Es Estable')
-        else sum(U)==0; %sumatoria de imaginarios repetidos.
-            disp(['El sistema Global : ', evalc('FT')])
+        elseif (Re>0)
+            disp(['El Sistema Global : ', evalc('FT')])
+            disp('Es Inestable')
+        elseif sum((R)==0)>=1;
+            disp(['El Sistema Global : ', evalc('FT')])
             disp('Es Marginalmente Estable')
+        else
+            disp(['El Sistema Global : ', evalc('FT')])
+            disp('Es Estable')
         end
         
     otherwise
