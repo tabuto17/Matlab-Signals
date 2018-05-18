@@ -5,7 +5,7 @@
 clc,clearvars,clear workspace, close all
 
 Sys=input('Seleccione la interconexión: paralelo (P) o cascada (S): ','s');
-t=linspace(0,10);
+t=linspace(0,10,1e3);
 
 switch Sys
     
