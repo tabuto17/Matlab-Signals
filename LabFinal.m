@@ -1,65 +1,47 @@
-% Christian Camilo Gaviria Castro - 
+% Christian Camilo Gaviria Castro - 1017229318
 % Julian Castrillón García -
 % Brahian Steven Cortés -
 
 clc,clearvars,clear workspace, close all
 
-a=('a. Christian Gaviria');
-b=('b. Julian Castrillón');
-c=('c. Brahian Cortés');
+Sujeto=('a. Christian Gaviria\nb. Julian Castrillón\nc. Brahian Cortés\n');
 disp('Seleccione sujeto:')
-disp(a)
-disp(b)
-disp(c)
-S=input(':');
+fprintf(Sujeto)
+subject=input(':','s');
 
-switch S
-    case a %Christian Gaviria
-        d=('d. Praxias');
-        e=('e. Fonendoscopio');
-        f=('f. Deglución');
+switch subject
+    case 'a' %Christian Gaviria
+        Experimento=('a. Praxias\nb. Fonendoscopio\nc. Deglución\n');
         disp('Seleccione experimiento:')
-        disp(d)
-        disp(e)
-        disp(f)
-        E=input(':');
+        fprintf(Experimento)
+        Prueba=input(':','s');
         
-        switch E
-            case d
+        switch Prueba
+            case 'a'
                 load('cristiangaviria-praxis.mat')
-            case e
+            case 'b'
                 load('cristiangaviria-fonendoscopio.mat')
-            case f
+            case 'c'
                 load('cristiangaviria-deglucion.mat')
         end
         
-        g=('g. Abrir boca');
-        h=('h. Apretar dientes');
-        i=('i. Tirar beso');
+        Actividad=('a. Abrir boca\nb. Apretar dientes\nc. Tirar beso\n');
         disp('Seleccione actividad:')
-        disp(g)
-        disp(h)
-        disp(i)
-        A=input(':');
+        fprintf(Actividad)
+        Gestos=input(':','s');
         
-        switch A
-            case g
+        switch Gestos
+            case 'a'
                 boca=(data(datastart(:,1):dataend(:,1)));
-            case h
+            case 'b'
                 dientes=(data(datastart(:,2):dataend(:,2)));
-            case i
+            case 'c'
                 beso=(data(datastart(:,3):dataend(:,3)));
         end
         
-%         aa=('1. Fonendoscopio');
-%         bb=('2. Cigomatica_R');
-%         cc=('3. Cigomatica_L');
-%            ('4. Orbicular_Sup');
-%            ('5. Orbicular_Inf');
-%            ('6. Suprahio_R');
-%            ('7. Suprahio_L');
-%            ('8. Infrahio_R');
-%            ('9. Infrahio_L');         
-%         disp('Seleccione canales:')
-%         A=input(':');
+        Canal=('1. Fonendoscopio\n2. Cigomatica_R\n3. Cigomatica_L\n4. Orbicular_Sup\n5. Orbicular_Inf\n6. Suprahio_R\n7. Suprahio_L\n8. Infrahio_R\n9. Infrahio_L\n');
+        disp('Seleccione canales:')
+        fprintf(Canal)
+        Channel=input(':');
+        
 end
