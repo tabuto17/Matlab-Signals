@@ -8,10 +8,11 @@ Sujeto=('a. Christian Gaviria\nb. Julian Castrillón\nc. Brahian Cortés\n');
 disp('Seleccione sujeto:')
 fprintf(Sujeto)
 Usuario=input(':','s');
+Fs=2000;
 
 switch Usuario
     case 'a' %Christian Gaviria
-        Experimento=('a. Praxias\nb. Fonendoscopio\nc. Deglución\n');
+        Experimento=('a. Praxis\nb. Fonendoscopio\nc. Deglución\n');
         disp('Seleccione experimiento:')
         fprintf(Experimento)
         Prueba=input(':','s');
@@ -63,7 +64,7 @@ Tarea=input(':','s');
 
 switch Tarea
     case 'a'
-        ind=1;
+        ind=1; %indicador
     case 'b'
         ind=2;
     case 'c'
@@ -77,38 +78,42 @@ Channel=input(':');
 
 if ind==1
     for i=1:length(Channel)
-        boca(i,:)=data(datastart(Channel(i),1):dataend(Channel(i),1));
+        boca(i,:)=data(datastart(Channel(i),1):dataend(Channel(i),1)); %Posición y selección de canales
+        %w=fft(boca(i,:)); transform !!!
     end
     
+    t1=0:1/Fs:length(boca(1,:))/Fs-1/Fs;
     subplot(311)
-    plot(boca(1,:))
-    title(['El canal utilizado es: ',num2str(Channel(1))])
+    plot(t1,boca(1,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])%(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     subplot(312)
-    plot(boca(2,:))
-    title(['El canal utilizado es: ',num2str(Channel(2))])
+    plot(t1,boca(2,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     subplot(313)
-    plot(boca(3,:))
-    title(['El canal utilizado es: ',num2str(Channel(3))])
+    plot(t1,boca(3,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     
 elseif ind==2
     for j=1:length(Channel)
         dientes(j,:)=data(datastart(Channel(j),2):dataend(Channel(j),2));
+        %w=fft(boca(i,:)); transform !!!
     end
     
+    t2=0:1/Fs:length(dientes(1,:))/Fs-1/Fs;
     subplot(311)
-    plot(dientes(1,:))
-    title(['El canal utilizado es: ',num2str(Channel(1))])
+    plot(t2,dientes(1,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     subplot(312)
-    plot(dientes(2,:))
-    title(['El canal utilizad es: ',num2str(Channel(2))])
+    plot(t2,dientes(2,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     subplot(313)
-    plot(dientes(3,:))
-    title(['El canal utilizado es: ',num2str(Channel(3))])
+    plot(t2,dientes(3,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     
 elseif ind==3
@@ -116,16 +121,17 @@ elseif ind==3
         beso(k,:)=data(datastart(Channel(k),3):dataend(Channel(k),3));
     end
     
+    t3=0:1/Fs:length(beso(1,:))/Fs-1/Fs;
     subplot(311)
-    plot(beso(1,:))
-    title(['El canal utilizado es: ',num2str(Channel(1))])
+    plot(t3,beso(1,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     subplot(312)
-    plot(beso(2,:))
-    title(['El canal utilizado es: ',num2str(Channel(2))])
-    xlabel 'Tiempo [s]', ylabel 'Ampli  tud [V]', axis tight, grid on
+    plot(t3,beso(2,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
+    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     subplot(313)
-    plot(beso(3,:))
-    title(['El canal utilizado es: ',num2str(Channel(3))])
+    plot(t3,beso(3,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 end
