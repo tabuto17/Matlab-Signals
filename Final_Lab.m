@@ -175,11 +175,17 @@ title(['Espectro original de Fourier Señal: ',num2str(titles(Channel(i),:))])%(
 
 [num,den]=butter(5,[59 61]*2*pi,'stop','s');
 [num,den]=bilinear(num,den,Fs);
-df1=filter(num,den,Tarea(i,:));  %Filtro
+df1=filter(num,den,Tarea(i,:));
+
+%%%%%%%%%%%%%%%%%%%_____FILTRO-PASABANDA_____%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 [num,den]=butter(5,[25 500]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fs);
-df2=filter(num,den,df1);
-Ln=length(df2); %Longitud de la señal
+df2=filter(num,den,df1); %Filtro pasabanda al filtro notch
+
+%%%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Ln=length(df2); 
 Zn=fft(df2);
 Magn=abs(Zn/Ln);
 Mag2n=Magn(2:Ln/2).^2;
