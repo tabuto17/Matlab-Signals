@@ -214,17 +214,18 @@ plot(t,mod1,'r-',t,mod2,'k--');
 grid
 title('Señal Modulada en SSB')
 legend('Modulación Banda Superior','Modulación Banda Inferior')
+%Solo se grafica para saber como la va tomar... no se debe graficar
 
 magblu1=abs(fft(mod1));
 figure(5)
 subplot(3,1,i)
-plot(t,magblu1,'LineWidth',2.2)
+plot(t,magblu1,'LineWidth',2.2) %Linewidth: Ancho de la linea :)
 
 
 magblu2=abs(fft(mod2));
 figure(6)
 subplot(3,1,i)
-plot(t,magblu2,'LineWidth',2.2)
+plot(t,magblu2,'LineWidth',2.2) %Linewidth: Ancho de la linea :)
 
 end
 
