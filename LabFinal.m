@@ -97,14 +97,7 @@ elseif Prueba=='b' %Fonendoscopio
     disp('Seleccione canales:')
     fprintf(Canal)
     Channel=input(':');
-    
-            if Channel==1
-            temp=data(datastart(Channel(1),:):dataend(Channel(1),:));
-            Div=resample(temp,1,2);
-            Channel=Div;
-        else
-    end
-    
+
 elseif Prueba=='c' %Deglución
     
     Actividad=('a. Agua 5 mL\nb. Agua 10 mL\nc. Agua 20 mL\nd. Saliva\ne. Yogur 3 mL\nf. Yogur 5 mL\ng. Yogur 7 mL\nh. Yogur 10 mL\ni. Yogur 20 mL\nj. Galleta\n');
@@ -141,7 +134,17 @@ elseif Prueba=='c' %Deglución
 end
 
 for i=1:length(Channel)
-    Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind)); %Posición y selección de canales
+    if Prueba=='b'
+        if Channel(i)==1
+            Div=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
+            Div=resample(Div,1,2);
+            Tarea(i,:)=Div;
+        else
+            Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
+        end
+    else
+        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind)); %Posición y selección de canales
+    end
     
     t=0:1/Fs:length(Tarea(i,:))/Fs-1/Fs;
     subplot(3,1,i)
