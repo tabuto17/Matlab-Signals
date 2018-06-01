@@ -151,7 +151,7 @@ for i=1:length(Channel)
     figure(1)
     set(gcf,'Name','Señales en el dominio del tiempo') 
     subplot(3,1,i)
-    plot(t,Tarea(i,:))
+    plot(t,Tarea(i,:),'k')
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 
@@ -165,7 +165,7 @@ f=linspace(0,Fs/2,length(Mag2));
 figure(2)
 set(gcf,'Name','Señales con su espectro de Fourier') 
 subplot(3,1,i)
-plot(f,Mag2)
+plot(f,Mag2,'b')
 title(['Espectro original de Fourier Señal: ',num2str(titles(Channel(i),:))])%(fila,columna)
 
 
@@ -185,7 +185,7 @@ fn=linspace(0,Fs/2,length(Mag2n));
 figure(3)
 set(gcf,'Name','Señales filtradas con su espectro de Fourier') 
 subplot(3,1,i)
-plot(fn,Mag2n)
+plot(fn,Mag2n,'r')
 title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
 
 end
