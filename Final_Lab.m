@@ -173,7 +173,7 @@ title(['Espectro original de Fourier Señal: ',num2str(titles(Channel(i),:))])%(
 
 %%%%%%%%%%%%%%%%%%%%%_____FILTRO-NOTCH_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[num,den]=butter(5,[59 61]*2*pi,'stop','s');
+[num,den]=butter(5,[59 61]*2*pi,'stop','s'); %Rad/seg
 [num,den]=bilinear(num,den,Fs);
 df1=filter(num,den,Tarea(i,:));
 
@@ -183,7 +183,7 @@ df1=filter(num,den,Tarea(i,:));
 [num,den]=bilinear(num,den,Fs);
 df2=filter(num,den,df1); %Filtro pasabanda al filtro notch
 
-%%%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Ln=length(df2); 
 Zn=fft(df2);
@@ -195,6 +195,36 @@ set(gcf,'Name','Señales filtradas con su espectro de Fourier')
 subplot(3,1,i)
 plot(fn,Mag2n,'r')
 title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
+
+%%%%%%%%%%%%%%%%%%%%%%%_____MODULACION_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Fmu=4000; %Frecuencia muestreo 4kHz
+Fp1=1200; %Frecuencia portadora sn1
+Fp2=1500; %Frecuencia portadora sn2
+Fp3=800;  %Frecuencia portadora sn3
+
+%tomar en cuenta que solo debemos tomar una banda BLU
+mod1 = ssbmod(Tarea(i,:),Fp1,Fmu,0); % modulacion banda inferior
+mod2 = ssbmod(Tarea(i,:),Fp1,Fmu,0,'upper'); % Modulacion Banda Superior
+
+mag=abs(fft(mod1));
+figure(4)
+subplot(3,1,i)
+plot(t,mod1,'r-',t,mod2,'k--');
+grid
+title('Señal Modulada en SSB')
+legend('Modulación Banda Superior','Modulación Banda Inferior')
+
+magblu1=abs(fft(mod1));
+figure(5)
+subplot(3,1,i)
+plot(t,magblu1,'LineWidth',2.2)
+
+
+magblu2=abs(fft(mod2));
+figure(6)
+subplot(3,1,i)
+plot(t,magblu2,'LineWidth',2.2)
 
 end
 
