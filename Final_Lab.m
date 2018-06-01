@@ -147,7 +147,7 @@ for i=1:length(Channel)
   
     end
     
-%%%%%%%%%%%%%%%%%%%%%%_____Señal-Original_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%_____SEÑAL-ORIGINAL_____%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     t=0:1/Fs:length(Tarea(i,:))/Fs-Ts;
     figure(1)
@@ -157,7 +157,7 @@ for i=1:length(Channel)
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 
-%%%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 L=length(Tarea(i,:)); %Longitud de la señal
 Z=fft(Tarea(i,:));
@@ -171,7 +171,7 @@ plot(f,Mag2,'b')
 title(['Espectro original de Fourier Señal: ',num2str(titles(Channel(i),:))])%(fila,columna)
 
 
-%%%%%%%%%%%%%%%%%%%%%%_____FILTRO-NOTCH_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%_____FILTRO-NOTCH_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [num,den]=butter(5,[59 61]*2*pi,'stop','s');
 [num,den]=bilinear(num,den,Fs);
@@ -191,7 +191,4 @@ plot(fn,Mag2n,'r')
 title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
 
 end
-
-
-
 
