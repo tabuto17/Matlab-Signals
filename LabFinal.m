@@ -12,7 +12,7 @@ Fs=2000;
 
 switch Usuario
     case 'a' %Christian Gaviria
-        Experimento=('a. Praxis\nb. Fonendoscopio\nc. Deglución\n');
+        Experimento=('a. Praxias\nb. Fonendoscopio\nc. Deglución\n');
         disp('Seleccione experimiento:')
         fprintf(Experimento)
         Prueba=input(':','s');
@@ -57,81 +57,95 @@ switch Usuario
         end
 end
 
-Actividad=('a. Abrir boca\nb. Apretar dientes\nc. Tirar beso\n');
-disp('Seleccione actividad:')
-fprintf(Actividad)
-Tarea=input(':','s');
-
-switch Tarea
-    case 'a'
-        ind=1; %indicador
-    case 'b'
-        ind=2;
-    case 'c'
-        ind=3;
+if Prueba=='a' %Praxias
+    Actividad=('a. Abrir boca\nb. Apretar dientes\nc. Tirar beso\n');
+    disp('Seleccione actividad:')
+    fprintf(Actividad)
+    Ocupacion=input(':','s');
+    
+    switch Ocupacion
+        case 'a'
+            ind=1; %indicador
+        case 'b'
+            ind=2;
+        case 'c'
+            ind=3;
+    end
+    
+    Canal=('1. Pulsador\n2. Cigomatica_R\n3. Cigomatica_L\n4. Orbicular_Sup\n5. Orbicular_Inf\n6. Suprahio_R\n7. Suprahio_L\n8. Infrahio_R\n9. Infrahio_L\n');
+    disp('Seleccione canales:')
+    fprintf(Canal)
+    Channel=input(':');
+    
+elseif Prueba=='b' %Fonendoscopio
+    
+    Actividad=('a. Yogur 3 mL\nb. Yogur 7 mL\nc. Saliva\n');
+    disp('Seleccione actividad:')
+    fprintf(Actividad)
+    Ocupacion=input(':','s');
+    
+    switch Ocupacion
+        case 'a'
+            ind=1; %indicador
+        case 'b'
+            ind=2;
+        case 'c'
+            ind=3;
+    end
+    
+    Canal=('1. Fonendoscopio\n2. Cigomatica_R\n3. Cigomatica_L\n4. Orbicular_Sup\n5. Orbicular_Inf\n6. Suprahio_R\n7. Suprahio_L\n8. Infrahio_R\n');
+    disp('Seleccione canales:')
+    fprintf(Canal)
+    Channel=input(':');
+    
+            if Channel==1
+            temp=data(datastart(Channel(1),:):dataend(Channel(1),:));
+            Div=resample(temp,1,2);
+            Channel=Div;
+        else
+    end
+    
+elseif Prueba=='c' %Deglución
+    
+    Actividad=('a. Agua 5 mL\nb. Agua 10 mL\nc. Agua 20 mL\nd. Saliva\ne. Yogur 3 mL\nf. Yogur 5 mL\ng. Yogur 7 mL\nh. Yogur 10 mL\ni. Yogur 20 mL\nj. Galleta\n');
+    disp('Seleccione actividad:')
+    fprintf(Actividad)
+    Ocupacion=input(':','s');
+    
+    switch Ocupacion
+        case 'a'
+            ind=1; %indicador
+        case 'b'
+            ind=2;
+        case 'c'
+            ind=3;
+        case 'd'
+            ind=4;
+        case 'e'
+            ind=5;
+        case 'f'
+            ind=6;
+        case 'g'
+            ind=7;
+        case 'h'
+            ind=8;
+        case 'i'
+            ind=9;
+        case 'j'
+            ind=10;
+    end
+    Canal=('1. Cigomatica_R\n2. Cigomatica_L\n3. Orbicular_Sup\n4. Orbicular_Inf\n5. Suprahio_R\n6. Suprahio_L\n7. Infrahio_R\n8. Infrahio_L\n');
+    disp('Seleccione canales:')
+    fprintf(Canal)
+    Channel=input(':');
 end
 
-Canal=('1. Fonendoscopio\n2. Cigomatica_R\n3. Cigomatica_L\n4. Orbicular_Sup\n5. Orbicular_Inf\n6. Suprahio_R\n7. Suprahio_L\n8. Infrahio_R\n9. Infrahio_L\n');
-disp('Seleccione canales:')
-fprintf(Canal)
-Channel=input(':');
-
-if ind==1
-    for i=1:length(Channel)
-        boca(i,:)=data(datastart(Channel(i),1):dataend(Channel(i),1)); %Posición y selección de canales
-        %w=fft(boca(i,:)); transform !!!
-    end
+for i=1:length(Channel)
+    Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind)); %Posición y selección de canales
     
-    t1=0:1/Fs:length(boca(1,:))/Fs-1/Fs;
-    subplot(311)
-    plot(t1,boca(1,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])%(fila,columna)
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    subplot(312)
-    plot(t1,boca(2,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    subplot(313)
-    plot(t1,boca(3,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    
-elseif ind==2
-    for j=1:length(Channel)
-        dientes(j,:)=data(datastart(Channel(j),2):dataend(Channel(j),2));
-        %w=fft(boca(i,:)); transform !!!
-    end
-    
-    t2=0:1/Fs:length(dientes(1,:))/Fs-1/Fs;
-    subplot(311)
-    plot(t2,dientes(1,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    subplot(312)
-    plot(t2,dientes(2,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    subplot(313)
-    plot(t2,dientes(3,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    
-elseif ind==3
-    for k=1:length(Channel)
-        beso(k,:)=data(datastart(Channel(k),3):dataend(Channel(k),3));
-    end
-    
-    t3=0:1/Fs:length(beso(1,:))/Fs-1/Fs;
-    subplot(311)
-    plot(t3,beso(1,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    subplot(312)
-    plot(t3,beso(2,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
-    xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-    subplot(313)
-    plot(t3,beso(3,:))
-    title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
+    t=0:1/Fs:length(Tarea(i,:))/Fs-1/Fs;
+    subplot(3,1,i)
+    plot(t,Tarea(i,:))
+    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 end
