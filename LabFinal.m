@@ -61,9 +61,9 @@ if Prueba=='a' %Praxias
     Actividad=('a. Abrir boca\nb. Apretar dientes\nc. Tirar beso\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
-    Ocupacion=input(':','s');
+    Accion=input(':','s');
     
-    switch Ocupacion
+    switch Accion
         case 'a'
             ind=1; %indicador
         case 'b'
@@ -82,9 +82,9 @@ elseif Prueba=='b' %Fonendoscopio
     Actividad=('a. Yogur 3 mL\nb. Yogur 7 mL\nc. Saliva\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
-    Ocupacion=input(':','s');
+    Accion=input(':','s');
     
-    switch Ocupacion
+    switch Accion
         case 'a'
             ind=1; %indicador
         case 'b'
@@ -97,15 +97,15 @@ elseif Prueba=='b' %Fonendoscopio
     disp('Seleccione canales:')
     fprintf(Canal)
     Channel=input(':');
-
+    
 elseif Prueba=='c' %Deglución
     
     Actividad=('a. Agua 5 mL\nb. Agua 10 mL\nc. Agua 20 mL\nd. Saliva\ne. Yogur 3 mL\nf. Yogur 5 mL\ng. Yogur 7 mL\nh. Yogur 10 mL\ni. Yogur 20 mL\nj. Galleta\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
-    Ocupacion=input(':','s');
+    Accion=input(':','s');
     
-    switch Ocupacion
+    switch Accion
         case 'a'
             ind=1; %indicador
         case 'b'
@@ -134,21 +134,52 @@ elseif Prueba=='c' %Deglución
 end
 
 for i=1:length(Channel)
-    if Prueba=='b'
-        if Channel(i)==1
-            Div=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
-            Div=resample(Div,1,2);
-            Tarea(i,:)=Div;
-        else
-            Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
-        end
+    if Prueba=='b' && Channel(i)==1
+        Div=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
+        Div=resample(Div,1,2);
+        Tarea(i,:)=Div;
     else
-        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind)); %Posición y selección de canales
+        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
     end
     
     t=0:1/Fs:length(Tarea(i,:))/Fs-1/Fs;
+    figure(1);
+    set(gcf,'Name','Señales en el dominio del tiempo.')
     subplot(3,1,i)
     plot(t,Tarea(i,:))
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
+    
+    Longitud=length(Tarea(i,:)); %Longitud de la señal
+    Fourier=fft(Tarea(i,:));
+    Magnitud=abs(Fourier/Longitud);
+    dimension=Magnitud(2:Longitud/2).^2;
+    f=linspace(0,Fs/2,length(dimension));
+    figure(2);
+    set(gcf,'Name','Señales en el dominio de la frecuencia.')
+    subplot(3,1,i)
+    plot(f,dimension)
+    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
+    xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+    
+    %Filtro Notch
+    [num,den]=butter(5,[59 61]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace y de un filtro continuo
+    [num,den]=bilinear(num,den,Fs);
+    filtroN(i,:)=filter(num,den,Tarea(i,:));
+    
+    %Filtro pasa banda
+    [num,den]=butter(3,[25 500]*2*pi,'bandpass','s'); %compara el stream que esta entre apostrofes
+    [num,den]=bilinear(num,den,Fs);
+    filtroP(i,:)=filter(num,den,filtroN(i,:)); %Filtro pasabanda al filtro notch
+    
+    Ln=length(filtroP(i,:));
+    Zn=fft(filtroP(i,:));
+    Magn=abs(Zn/Ln);
+    Mag2n=Magn(2:Ln/2).^2; %vector tiempo
+    fn=linspace(0,Fs/2,length(Mag2n));
+    figure(3)
+    set(gcf,'Name','Señales filtradas con su espectro de Fourier.')
+    subplot(3,1,i)
+    plot(fn,Mag2n,'r')
+    title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
 end
