@@ -183,7 +183,8 @@ for i=1:length(Channel)
     df2(i,:)=filter(num,den,df1(i,:)); %Filtro pasabanda al filtro notch
     
     %%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Numeral 5
+    
+    %Numeral 5 Espectro de fourier de las señales filtradas
     Ln=length(df2(i,:));
     Zn=fft(df2(i,:));
     Magn=abs(Zn/Ln);
@@ -194,14 +195,19 @@ for i=1:length(Channel)
     subplot(3,1,i)
     plot(fn,Mag2n,'r')
     title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
-     
-end
-%Modulacion
+   end
+
+%%%%%%%%%%%%%%%%%%%%%%%_____MODULACION_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fmu= Fs*2;   %Frecuencia muestreo 4kHz
+    Fp1= 600;    %Frecuencia portadora sn1
+    Fp2= 1200;   %Frecuencia portadora sn2
+    Fp3= 1800;   %Frecuencia portadora sn3  
+
 %Remuestreamos la señal al doble
 
-mod_1=resample(df2(1,:),4,1);
-mod_2=resample(df2(2,:),4,1);
-mod_3=resample(df2(3,:),4,1);
+mod_1=resample(df2(1,:),2,1);
+mod_2=resample(df2(2,:),2,1);
+mod_3=resample(df2(3,:),2,1);
 
 %Modulacion BLU Banda lateral inferior
 
@@ -219,7 +225,7 @@ fmod1=linspace(0,Fmu,length(magblu1));
 fmod2=linspace(0,Fmu,length(magblu2));
 fmod3=linspace(0,Fmu,length(magblu3));
 
-%Numeral 6
+%Numeral 6 espectro de fourier de las señales moduladas
 figure(5)
 set(gcf,'Name','Señales Moduladas BLU - Espectro de Fourier')
 subplot(3,1,1)
@@ -246,14 +252,14 @@ sf3=filter(num,den,mod_sup3);
 
 %Multiplexacion
 
-%Numeral 7
+%Numeral 7 Espectro de fourier de la señal modulada que viaja por el medio
 SM=sf1+sf2+sf3; % SM ES LA SEÑAL MULTIPLEXADA
 LM=length(SM);
 ZM=fft(SM);
 MagLM=abs(ZM/LM);
 Mag2LM=MagLM(2:LM/2).^2; %Vector tiempo
 Fsm=linspace(0,Fmu,length(Mag2LM));
-figure(3)
+figure(6)
 set(gcf,'Name','Señal Multiplexada: Completa Modulada')
 plot(Fsm,Mag2LM,'r')
 title('Espectro de Fourier Señal Modulada')
@@ -290,6 +296,23 @@ SF2_=filter(num,den,SF2);
 [num,den]=bilinear(num,den,Fmu);
 SF3_=filter(num,den,SF3);
 
+Demu1= abs(fft(SF1_));
+Demu2= abs(fft(SF2_));
+Demu3= abs(fft(SF3_));
+
+Demut1=linspace(0,Fmu,length(Demu1));
+Demut2=linspace(0,Fmu,length(Demu2));
+Demut3=linspace(0,Fmu,length(Demu3));
+%Numeral 8 Señales demultiplexadas con los filtros pasabandas
+figure(8)
+set(gcf,'Name','Señales Demultiplexadas con Filtros Pasabandas')
+subplot(3,1,1)
+plot(Demut1,Demu1,'LineWidth',2.2) 
+subplot(3,1,2)
+plot(Demut2,Demu2,'LineWidth',2.2)
+subplot(3,1,3)
+plot(Demut3,Demu3,'LineWidth',2.2)
+
 %DEMODULACION DE LAS SEÑALES
 
 demod_1=resample(SF1_,2,1);
@@ -307,13 +330,31 @@ demagblu3= abs(fft(demod_sup3));
 defmod1=linspace(0,Fmu,length(demagblu1));
 defmod2=linspace(0,Fmu,length(demagblu2));
 defmod3=linspace(0,Fmu,length(demagblu3));
-
-figure(6)
+%Numeral 9 Señales demuduladas 
+figure(9)
 set(gcf,'Name','Señales Demoduladas con su espectro de Fourier')
 subplot(3,1,1)
-plot(defmod1,demagblu1,'LineWidth',2.2) %Linewidth: Ancho de la linea :)
+plot(defmod1,demagblu1,'LineWidth',2.2) 
 subplot(3,1,2)
 plot(defmod2,demagblu2,'LineWidth',2.2)
 subplot(3,1,3)
 plot(defmod3,demagblu3,'LineWidth',2.2)
+
+%Numeral 10 Señales demoduladas en el dominio del tiempo
+tdem1=0:1/Fmu:length(demod_sup1)/Fmu-1/Fmu;
+tdem2=0:1/Fmu:length(demod_sup2)/Fmu-1/Fmu;
+tdem3=0:1/Fmu:length(demod_sup3)/Fmu-1/Fmu;
+
+figure(10)
+set(gcf,'Name','Señales demoduladas en el dominio del tiempo')
+subplot(3,1,1)
+plot(tdem1,demod_sup1,'k')
+xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
+subplot(3,1,2)
+plot(tdem2,demod_sup2,'k')
+xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
+subplot(3,1,3)
+plot(tdem3,demod_sup3,'k')
+xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
+
 
