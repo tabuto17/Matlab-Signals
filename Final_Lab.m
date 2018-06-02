@@ -194,31 +194,9 @@ for i=1:length(Channel)
     subplot(3,1,i)
     plot(fn,Mag2n,'r')
     title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
-   
-    %%%%%%%%%%%%%%%%%%%%%%%_____MODULACION_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    Fmu= Fs*4;   %Frecuencia muestreo 4kHz
-    Fp1= 600;    %Frecuencia portadora sn1
-    Fp2= 1200;   %Frecuencia portadora sn2
-    Fp3= 1800;   %Frecuencia portadora sn3
-    
-    %Tomar en cuenta que solo debemos tomar una banda BLU:
-    mod1 = ssbmod(df2(i,:),Fp1,Fmu,0); % Modulacion Banda Inferior
-    mod2 = ssbmod(df2(i,:),Fp1,Fmu,0,'upper');  % Modulacion Banda Superior
-    
-    mag1= abs(fft(mod1));
-    mag2= abs(fft(mod2));
-    
-    figure(4)
-    subplot(3,1,i)
-    plot(t,mod1,'r-',t,mod2,'k--');
-    grid
-    title('Señal Modulada en SSB')
-    legend('Modulación Banda Superior','Modulación Banda Inferior')
-    %Solo se grafica para saber como la va tomar... no se debe graficar
-    
+     
 end
-
+%Modulacion
 %Remuestreamos la señal al doble
 
 mod_1=resample(df2(1,:),4,1);
