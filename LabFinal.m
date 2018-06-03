@@ -185,3 +185,51 @@ for i=1:length(Channel)
 end
 
 %Modulación
+Fm=Fs*2; %Frecuencia de muestreo 4kHz
+Fp1=600; %Frecuencia de portadora sn1
+Fp2=1200; %Frecuencia de portadora sn2
+Fp3=1800; %Frecuencia de portadora sn3
+
+%Remuestreo de la señal al doble
+modu1=resample(PasaBandas(i,:),2,1);
+modu2=resample(PasaBandas(i,:),2,1);
+modu3=resample(PasaBandas(i,:),2,1);
+
+%Modulación BLU Banda lateral inferior
+Blue1=ssbmod(modu1,Fp1,Fm);
+Blue2=ssbmod(modu2,Fp2,Fm);
+Blue3=ssbmod(modu3,Fp3,Fm);
+
+%Espectro de Fourier
+Magblu1=abs(fft(Blue1));
+Magblu2=abs(fft(Blue2));
+Magblu3=abs(fft(Blue3));
+fmod1=linspace(0,Fm,length(Magblu1));
+fmod2=linspace(0,Fm,length(Magblu2));
+fmod3=linspace(0,Fm,length(Magblu3));
+
+figure(4)
+set(gcf,'Name','Single Sideband Amplitude Modulation in Fourier Spectrum.')
+subplot(3,1,1)
+plot(fmod1,Magblu1,'LineWidth',1.9) %Linewidth: Ancho de la linea
+title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,2)
+plot(fmod2,Magblu2,'LineWidth',1.9)
+title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,3)
+plot(fmod3,Magblu3,'LineWidth',1.9)
+title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+
+%Filtro Pasa Bandas
+[num,den]=butter(2,[100 575]*2*pi,'bandpass','s');
+[num,den]=bilinear(num,den,Fm);
+sf1=filter(num,den,Blue1);
+[num,den]=butter(2,[700 1175]*2*pi,'bandpass','s');
+[num,den]=bilinear(num,den,Fm);
+sf2=filter(num,den,Blue2);
+[num,den]=butter(2,[1300 1775]*2*pi,'bandpass','s');
+[num,den]=bilinear(num,den,Fm);
+sf3=filter(num,den,Blue3);
