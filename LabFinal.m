@@ -139,47 +139,49 @@ for i=1:length(Channel)
         Div=resample(Div,1,2);
         Tarea(i,:)=Div;
     else
-        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
+        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));%Tarea(columna,fila)
     end
     
     t=0:1/Fs:length(Tarea(i,:))/Fs-1/Fs;
     figure(1);
-    set(gcf,'Name','Señales en el dominio del tiempo.')
+    set(gcf,'Name','Signals in time domain.')
     subplot(3,1,i)
-    plot(t,Tarea(i,:))
+    plot(t,Tarea(i,:),'k')
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     
-    Longitud=length(Tarea(i,:)); %Longitud de la señal
     Fourier=fft(Tarea(i,:));
+    Longitud=length(Tarea(i,:)); %Se almacena toda longitud de la señal en una nueva variable
     Magnitud=abs(Fourier/Longitud);
-    dimension=Magnitud(2:Longitud/2).^2;
-    f=linspace(0,Fs/2,length(dimension));
+    Dimension=Magnitud(2:Longitud/2).^2; %Es necesario elevarlo al cuadrado por FFT
+    f1=linspace(0,Fs/2,length(Dimension));
     figure(2);
-    set(gcf,'Name','Señales en el dominio de la frecuencia.')
+    set(gcf,'Name','Signals in frequency domain.')
     subplot(3,1,i)
-    plot(f,dimension)
+    plot(f1,Dimension,'b')
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
     %Filtro Notch
-    [num,den]=butter(5,[59 61]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace y de un filtro continuo
+    [num,den]=butter(2,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace y de un filtro continuo
     [num,den]=bilinear(num,den,Fs);
-    filtroN(i,:)=filter(num,den,Tarea(i,:));
+    Notch(i,:)=filter(num,den,Tarea(i,:));
     
-    %Filtro pasa banda
-    [num,den]=butter(3,[25 500]*2*pi,'bandpass','s'); %compara el stream que esta entre apostrofes
+    %Filtro Pasa Bandas
+    [num,den]=butter(2,[25 500]*2*pi,'bandpass','s'); %'2' es el orden
     [num,den]=bilinear(num,den,Fs);
-    filtroP(i,:)=filter(num,den,filtroN(i,:)); %Filtro pasabanda al filtro notch
+    PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro pasa bandas al filtro Notch.
     
-    Ln=length(filtroP(i,:));
-    Zn=fft(filtroP(i,:));
-    Magn=abs(Zn/Ln);
-    Mag2n=Magn(2:Ln/2).^2; %vector tiempo
-    fn=linspace(0,Fs/2,length(Mag2n));
+    fourier=fft(PasaBandas(i,:));
+    longitud=length(PasaBandas(i,:));
+    magnitud=abs(fourier/longitud);
+    dimension=magnitud(2:longitud/2).^2;
+    f2=linspace(0,Fs/2,length(dimension));
     figure(3)
-    set(gcf,'Name','Señales filtradas con su espectro de Fourier.')
+    set(gcf,'Name','Filtered signals with the Fourier spectrum.')
     subplot(3,1,i)
-    plot(fn,Mag2n,'r')
-    title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
+    plot(f2,dimension,'r')
+    title(['Señal filtrada del canal: ',num2str(titles(Channel(i),:))])%(fila,columna)
 end
+
+%Modulación
