@@ -247,8 +247,8 @@ sf3=filter(num,den,mod_sup3);
 
 SM=sf1+sf2+sf3; % SM ES LA SEÑAL MULTIPLEXADA
 LM=length(SM); ZM=fft(SM);
-MagLM=abs(ZM/LM); Mag2LM=MagLM(2:LM/2).^2; %Vector tiempo
-Fsm=linspace(0,Fmu/2,length(Mag2LM));
+MagLM=abs(ZM/LM); Mag2LM=MagLM(2:LM/3).^2; %Vector tiempo
+Fsm=linspace(0,Fmu/3,length(Mag2LM));
 figure(5); set(gcf,'Name','Señal Multiplexada: Completa Modulada')
 plot(Fsm,Mag2LM,'r'); title('Espectro de Fourier Señal Modulada')
 
