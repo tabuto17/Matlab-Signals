@@ -147,7 +147,7 @@ for i=1:length(Channel)
     set(gcf,'Name','Signals in time domain.')
     subplot(3,1,i)
     plot(t,Tarea(i,:),'k')
-    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
+    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))]) %(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     
     Fourier=fft(Tarea(i,:));
@@ -163,14 +163,14 @@ for i=1:length(Channel)
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
     %Filtro Notch
-    [num,den]=butter(5,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, filtro rechaza bandas
+    [num,den]=butter(5,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
     [num,den]=bilinear(num,den,Fs);
     Notch(i,:)=filter(num,den,Tarea(i,:));
     
     %Filtro Pasa Bandas
     [num,den]=butter(5,[25 500]*2*pi,'bandpass','s'); %'2' es el orden
     [num,den]=bilinear(num,den,Fs);
-    PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro pasa bandas al filtro Notch.
+    PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro Pasa Bandas al Filtro Notch.
     
     fourier=fft(PasaBandas(i,:));
     longitud=length(PasaBandas(i,:));
@@ -243,7 +243,7 @@ MagnitudM=abs(FourierM/LongitudM);
 DimensionM=MagnitudM(2:LongitudM/2).^2;
 f3=linspace(0,Fm,length(DimensionM));
 figure(5)
-set(gcf,'Name','Fourier Spectrum of the modulated signal')
+set(gcf,'Name','Fourier Spectrum of modulated signal.')
 plot(f3,DimensionM,'m')
 title('Espectro de Fourier de la señal modulada')
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
@@ -275,3 +275,24 @@ BPFC2=filter(num,den,bpf2);
 [num,den]=butter(2,Fp3*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
 BPFC3=filter(num,den,bpf3);
+
+Demu1=abs(fft(BPFC1));
+Demu2=abs(fft(BPFC2));
+Demu3=abs(fft(BPFC3));
+f4=linspace(0,Fm,length(Demu1));
+f5=linspace(0,Fm,length(Demu2));
+f6=linspace(0,Fm,length(Demu3));
+figure(6)
+set(gcf,'Name','Fourier Spectrum of demultiplexed signals with bandpass filters.')
+subplot(3,1,1)
+plot(f4,Demu1,'LineWidth',1.9)
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(i),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,2)
+plot(f5,Demu2,'LineWidth',1.9)
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(i),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,3)
+plot(f6,Demu3,'LineWidth',1.9)
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(i),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
