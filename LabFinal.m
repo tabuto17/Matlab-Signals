@@ -163,12 +163,12 @@ for i=1:length(Channel)
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
     %Filtro Notch
-    [num,den]=butter(2,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace y de un filtro continuo
+    [num,den]=butter(5,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, filtro rechaza bandas
     [num,den]=bilinear(num,den,Fs);
     Notch(i,:)=filter(num,den,Tarea(i,:));
     
     %Filtro Pasa Bandas
-    [num,den]=butter(2,[25 500]*2*pi,'bandpass','s'); %'2' es el orden
+    [num,den]=butter(5,[25 500]*2*pi,'bandpass','s'); %'2' es el orden
     [num,den]=bilinear(num,den,Fs);
     PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro pasa bandas al filtro Notch.
     
@@ -178,58 +178,100 @@ for i=1:length(Channel)
     dimension=magnitud(2:longitud/2).^2;
     f2=linspace(0,Fs/2,length(dimension));
     figure(3)
-    set(gcf,'Name','Filtered signals with the Fourier spectrum.')
+    set(gcf,'Name','Filtered signals in Fourier Spectrum.')
     subplot(3,1,i)
     plot(f2,dimension,'r')
-    title(['Señal filtrada del canal: ',num2str(titles(Channel(i),:))])%(fila,columna)
+    title(['Señal filtrada del canal: ',num2str(titles(Channel(i),:))])
+    xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 end
 
 %Modulación
-Fm=Fs*2; %Frecuencia de muestreo 4kHz
+Fm=Fs*3; %Frecuencia de muestreo 6kHz
 Fp1=600; %Frecuencia de portadora sn1
 Fp2=1200; %Frecuencia de portadora sn2
 Fp3=1800; %Frecuencia de portadora sn3
 
-%Remuestreo de la señal al doble
-modu1=resample(PasaBandas(i,:),2,1);
-modu2=resample(PasaBandas(i,:),2,1);
-modu3=resample(PasaBandas(i,:),2,1);
+%Remuestreo de la señal al triple (6000)
+Modu1=resample(PasaBandas(i,:),3,1);
+Modu2=resample(PasaBandas(i,:),3,1);
+Modu3=resample(PasaBandas(i,:),3,1);
 
-%Modulación BLU Banda lateral inferior
-Blue1=ssbmod(modu1,Fp1,Fm);
-Blue2=ssbmod(modu2,Fp2,Fm);
-Blue3=ssbmod(modu3,Fp3,Fm);
+%Modulación BLU-BLI
+Blue1=ssbmod(Modu1,Fp1,Fm);
+Blue2=ssbmod(Modu2,Fp2,Fm);
+Blue3=ssbmod(Modu3,Fp3,Fm);
 
-%Espectro de Fourier
-Magblu1=abs(fft(Blue1));
-Magblu2=abs(fft(Blue2));
-Magblu3=abs(fft(Blue3));
-fmod1=linspace(0,Fm,length(Magblu1));
-fmod2=linspace(0,Fm,length(Magblu2));
-fmod3=linspace(0,Fm,length(Magblu3));
-
+MagnitudBlu1=abs(fft(Blue1));
+MagnitudBlu2=abs(fft(Blue2));
+MagnitudBlu3=abs(fft(Blue3));
+fmod1=linspace(0,Fm,length(MagnitudBlu1));
+fmod2=linspace(0,Fm,length(MagnitudBlu2));
+fmod3=linspace(0,Fm,length(MagnitudBlu3));
 figure(4)
 set(gcf,'Name','Single Sideband Amplitude Modulation in Fourier Spectrum.')
 subplot(3,1,1)
-plot(fmod1,Magblu1,'LineWidth',1.9) %Linewidth: Ancho de la linea
+plot(fmod1,MagnitudBlu1,'LineWidth',1.9) %Linewidth: Ancho de la linea
 title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,2)
-plot(fmod2,Magblu2,'LineWidth',1.9)
+plot(fmod2,MagnitudBlu2,'LineWidth',1.9)
 title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,3)
-plot(fmod3,Magblu3,'LineWidth',1.9)
+plot(fmod3,MagnitudBlu3,'LineWidth',1.9)
 title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Filtro Pasa Bandas
 [num,den]=butter(2,[100 575]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
-sf1=filter(num,den,Blue1);
+BPF1=filter(num,den,Blue1);
+
 [num,den]=butter(2,[700 1175]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
-sf2=filter(num,den,Blue2);
+BPF2=filter(num,den,Blue2);
+
 [num,den]=butter(2,[1300 1775]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
-sf3=filter(num,den,Blue3);
+BPF3=filter(num,den,Blue3);
+
+%Multiplexación
+SM=BPF1+BPF2+BPF3; % SM = Señal Multiplexada
+FourierM=fft(SM);
+LongitudM=length(SM);
+MagnitudM=abs(FourierM/LongitudM);
+DimensionM=MagnitudM(2:LongitudM/2).^2;
+f3=linspace(0,Fm,length(DimensionM));
+figure(5)
+set(gcf,'Name','Fourier Spectrum of the modulated signal')
+plot(f3,DimensionM,'m')
+title('Espectro de Fourier de la señal modulada')
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+
+%Reconstrucción%
+
+%Filtro Pasa Bandas
+[num,den]=butter(2,[100 575]*2*pi,'bandpass','s');
+[num,den]=bilinear(num,den,Fm);
+bpf1=filter(num,den,SM);
+
+[num,den]=butter(2,[700 1175]*2*pi,'bandpass','s');
+[num,den]=bilinear(num,den,Fm);
+bpf2=filter(num,den,SM);
+
+[num,den]=butter(2,[1300 1775]*2*pi,'bandpass','s');
+[num,den]=bilinear(num,den,Fm);
+bpf3=filter(num,den,SM);
+
+%Filtro Pasa Bandas para eliminar la portadora
+[num,den]=butter(2,Fp1*2*pi,'low','s');
+[num,den]=bilinear(num,den,Fm);
+BPFC1=filter(num,den,bpf1); %BPFP1 = BandPass Filter Carrier 1
+
+[num,den]=butter(2,Fp2*2*pi,'low','s');
+[num,den]=bilinear(num,den,Fm);
+BPFC2=filter(num,den,bpf2);
+
+[num,den]=butter(2,Fp3*2*pi,'low','s');
+[num,den]=bilinear(num,den,Fm);
+BPFC3=filter(num,den,bpf3);
