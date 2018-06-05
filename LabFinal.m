@@ -160,14 +160,17 @@ for i=1:length(Channel)
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
-    if 
+    N=3;                 %Orden del Filtro
+    WnNotch=[55 69];     %Frecuencia de corte Filtro Notch
+    WnPass=[25 500];     %Frecuencia de corte Filtro Pasabanda
+    
     %Filtro Notch
-    [num,den]=butter(5,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
+    [num,den]=butter(N,WnNotch*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
     [num,den]=bilinear(num,den,Fs);
     Notch(i,:)=filter(num,den,Tarea(i,:));
     
     %Filtro Pasa Bandas
-    [num,den]=butter(5,[25 500]*2*pi,'bandpass','s'); %'5' es el orden
+    [num,den]=butter(N,WnPass*2*pi,'bandpass','s'); %'5' es el orden
     [num,den]=bilinear(num,den,Fs);
     PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro Pasa Bandas al Filtro Notch.
     
@@ -222,15 +225,15 @@ title(['Señal modulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Filtro Pasa Bandas, BW=475Hz
-[num,den]=butter(5,[100 575]*2*pi,'bandpass','s');
+[num,den]=butter(N,[100 575]*2*pi,'bandpass','s'); %num y den son los coeficientes del numerador y denominador, en orden decreciente de un filtro Butterworth digital.
 [num,den]=bilinear(num,den,Fm);
 BPF1=filter(num,den,Blue1);
 
-[num,den]=butter(5,[700 1175]*2*pi,'bandpass','s');
+[num,den]=butter(N,[700 1175]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF2=filter(num,den,Blue2);
 
-[num,den]=butter(5,[1300 1775]*2*pi,'bandpass','s');
+[num,den]=butter(N,[1300 1775]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF3=filter(num,den,Blue3);
 
@@ -250,28 +253,28 @@ xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 %Reconstrucción%
 
 %Filtro Pasa Bandas DEMUX
-[num,den]=butter(5,[100 575]*2*pi,'bandpass','s');
+[num,den]=butter(N,[100 575]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF1=filter(num,den,SM);
 
-[num,den]=butter(5,[700 1175]*2*pi,'bandpass','s');
+[num,den]=butter(N,[700 1175]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF2=filter(num,den,SM);
 
-[num,den]=butter(5,[1300 1775]*2*pi,'bandpass','s');
+[num,den]=butter(N,[1300 1775]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF3=filter(num,den,SM);
 
 %Filtro Pasa Bajas para eliminar la portadora
-[num,den]=butter(5,Fp1*2*pi,'low','s');
+[num,den]=butter(N,Fp1*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
 BPFC1=filter(num,den,BPF1); %BPFC1 = BandPass Filter Carrier 1
 
-[num,den]=butter(5,Fp2*2*pi,'low','s');
+[num,den]=butter(N,Fp2*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
 BPFC2=filter(num,den,BPF2);
 
-[num,den]=butter(5,Fp3*2*pi,'low','s');
+[num,den]=butter(N,Fp3*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
 BPFC3=filter(num,den,BPF3);
 
