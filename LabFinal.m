@@ -78,7 +78,6 @@ if Prueba=='a' %Praxias
     Channel=input(':');
     
 elseif Prueba=='b' %Fonendoscopio
-    
     Actividad=('a. Yogur 3 mL\nb. Yogur 7 mL\nc. Saliva\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
@@ -99,7 +98,6 @@ elseif Prueba=='b' %Fonendoscopio
     Channel=input(':');
     
 elseif Prueba=='c' %Deglución
-    
     Actividad=('a. Agua 5 mL\nb. Agua 10 mL\nc. Agua 20 mL\nd. Saliva\ne. Yogur 3 mL\nf. Yogur 5 mL\ng. Yogur 7 mL\nh. Yogur 10 mL\ni. Yogur 20 mL\nj. Galleta\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
@@ -153,8 +151,8 @@ for i=1:length(Channel)
     Fourier=fft(Tarea(i,:));
     Longitud=length(Tarea(i,:)); %Se almacena toda longitud de la señal en una nueva variable
     Magnitud=abs(Fourier/Longitud);
-    Dimension=Magnitud(2:Longitud/2).^2; %Es necesario elevarlo al cuadrado por FFT, longitud/2 realiza un zoom
-    f1=linspace(0,Fs/2,length(Dimension));
+    Dimension=Magnitud(2:Longitud/2).^2; %Teorema de Parseval, longitud/2 realiza un zoom a la gráfica
+    f1=linspace(0,Fs/2,length(Dimension)); %Fs/2 le realiza un zoom a la gráfica, muestra mayor espectro
     figure(2);
     set(gcf,'Name','Signals in frequency domain.')
     subplot(3,1,i)
@@ -162,6 +160,7 @@ for i=1:length(Channel)
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
+    if 
     %Filtro Notch
     [num,den]=butter(5,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
     [num,den]=bilinear(num,den,Fs);
@@ -245,7 +244,7 @@ f3=linspace(0,Fm/2,length(DimensionM));
 figure(5)
 set(gcf,'Name','Fourier Spectrum of modulated signal.')
 plot(f3,DimensionM,'m')
-title('Espectro de Fourier de la señal modulada')
+title('Espectro de Fourier de la señal modulada.')
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Reconstrucción%
@@ -253,28 +252,28 @@ xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 %Filtro Pasa Bandas DEMUX
 [num,den]=butter(5,[100 575]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
-bpf1=filter(num,den,SM);
+BPF1=filter(num,den,SM);
 
 [num,den]=butter(5,[700 1175]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
-bpf2=filter(num,den,SM);
+BPF2=filter(num,den,SM);
 
 [num,den]=butter(5,[1300 1775]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
-bpf3=filter(num,den,SM);
+BPF3=filter(num,den,SM);
 
 %Filtro Pasa Bajas para eliminar la portadora
 [num,den]=butter(5,Fp1*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
-BPFC1=filter(num,den,bpf1); %BPFP1 = BandPass Filter Carrier 1
+BPFC1=filter(num,den,BPF1); %BPFC1 = BandPass Filter Carrier 1
 
 [num,den]=butter(5,Fp2*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
-BPFC2=filter(num,den,bpf2);
+BPFC2=filter(num,den,BPF2);
 
 [num,den]=butter(5,Fp3*2*pi,'low','s');
 [num,den]=bilinear(num,den,Fm);
-BPFC3=filter(num,den,bpf3);
+BPFC3=filter(num,den,BPF3);
 
 Demo1=abs(fft(BPFC1));
 Demo2=abs(fft(BPFC2));
@@ -298,13 +297,13 @@ title(['Señal demultiplexada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Demodulación de las señales
-DemoSup1=ssbdemod(BPFC1,Fp1,Fm);
-DemoSup2=ssbdemod(BPFC2,Fp2,Fm);
-DemoSup3=ssbdemod(BPFC3,Fp3,Fm);
+DemoInf1=ssbdemod(BPFC1,Fp1,Fm);
+DemoInf2=ssbdemod(BPFC2,Fp2,Fm);
+DemoInf3=ssbdemod(BPFC3,Fp3,Fm);
 
-DemoBLUE1=abs(fft(DemoSup1));
-DemoBLUE2=abs(fft(DemoSup2));
-DemoBLUE3=abs(fft(DemoSup3));
+DemoBLUE1=abs(fft(DemoInf1));
+DemoBLUE2=abs(fft(DemoInf2));
+DemoBLUE3=abs(fft(DemoInf3));
 
 f7=linspace(0,Fm,length(DemoBLUE1));
 f8=linspace(0,Fm,length(DemoBLUE2));
@@ -328,20 +327,20 @@ demo1=resample(BPFC1,2,1); %Remuestrear nuevamente la señal
 demo2=resample(BPFC2,2,1);
 demo3=resample(BPFC3,2,1);
 
-t1=0:1/Fs:length(DemoSup1)/Fs-1/Fs;
-t2=0:1/Fs:length(DemoSup2)/Fs-1/Fs;
-t3=0:1/Fs:length(DemoSup3)/Fs-1/Fs;
+t1=0:1/Fs:length(DemoInf1)/Fs-1/Fs;
+t2=0:1/Fs:length(DemoInf2)/Fs-1/Fs;
+t3=0:1/Fs:length(DemoInf3)/Fs-1/Fs;
 figure(8)
 set(gcf,'Name','Demodulated signals in time domain.')
 subplot(3,1,1)
-plot(t1,DemoSup1,'k')
+plot(t1,DemoInf1,'k')
 title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 subplot(3,1,2)
-plot(t2,DemoSup2,'k')
+plot(t2,DemoInf2,'k')
 title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 subplot(3,1,3)
-plot(t3,DemoSup3,'k')
+plot(t3,DemoInf3,'k')
 title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
