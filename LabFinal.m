@@ -9,7 +9,7 @@ disp('Seleccione sujeto:')
 fprintf(Sujeto)
 Usuario=input(':','s');
 Fs=2000;
-N=2; %orden del filtro
+N=3; %orden del filtro
 
 switch Usuario
     case 'a' %Christian Gaviria
@@ -159,7 +159,7 @@ for i=1:length(Channel)
     subplot(3,1,i)
     plot(f1,Dimension,'b')
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
-    xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+    xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
     
     %Filtro Notch
     [num,den]=butter(N,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
@@ -167,10 +167,13 @@ for i=1:length(Channel)
     Notch(i,:)=filter(num,den,Tarea(i,:));
     
     %Filtro Pasa Bandas
-    [num,den]=butter(N,[25 500]*2*pi,'bandpass','s');
-    [num,den]=bilinear(num,den,Fs);
-    PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro Pasa Bandas al Filtro Notch.
-    
+    if Prueba=='a' && Channel(i)==1 || Prueba=='b' && Channel(i)==1
+        PasaBandas(i,:)=Notch(i,:);
+    else
+        [num,den]=butter(N,[25 500]*2*pi,'bandpass','s');
+        [num,den]=bilinear(num,den,Fs);
+        PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro Pasa Bandas al Filtro Notch.
+    end
     fourier=fft(PasaBandas(i,:));
     longitud=length(PasaBandas(i,:));
     magnitud=abs(fourier/longitud);
@@ -181,19 +184,19 @@ for i=1:length(Channel)
     subplot(3,1,i)
     plot(f2,dimension,'r')
     title(['Señal filtrada del canal: ',num2str(titles(Channel(i),:))])
-    xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+    xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 end
 
 %Modulación (La frecuencia de la portadora no puede ser mayor a la mitad de la frecuencia de muestreo)
-Fm=Fs*2; %Frecuencia de muestreo=4kHz
-Fp1=600; %Frecuencia de portadora 1
-Fp2=1200; %Frecuencia de portadora 2
-Fp3=1800; %Frecuencia de portadora 3
+Fm=Fs*5; %Frecuencia de muestreo=4kHz
+Fp1=1000; %Frecuencia de portadora 1
+Fp2=2000; %Frecuencia de portadora 2
+Fp3=3000; %Frecuencia de portadora 3
 
 %Remuestreo de la señal al doble (4KHz)
-Modu1=resample(PasaBandas(1,:),2,1);
-Modu2=resample(PasaBandas(2,:),2,1);
-Modu3=resample(PasaBandas(3,:),2,1);
+Modu1=resample(PasaBandas(1,:),5,1);
+Modu2=resample(PasaBandas(2,:),5,1);
+Modu3=resample(PasaBandas(3,:),5,1);
 
 %Modulación BLU-BLI
 Blue1=ssbmod(Modu1,Fp1,Fm); %No hay fase, por defecto se trabaja con la banda inferior
@@ -212,26 +215,26 @@ set(gcf,'Name','Single Sideband Amplitude Modulation in Fourier Spectrum.')
 subplot(3,1,1)
 plot(fmod1,MagnitudBlu1,'LineWidth',1.9) %Linewidth: Ancho de la linea
 title(['Señal modulada del canal: ',num2str(titles(Channel(1),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 subplot(3,1,2)
 plot(fmod2,MagnitudBlu2,'LineWidth',1.9)
 title(['Señal modulada del canal: ',num2str(titles(Channel(2),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 subplot(3,1,3)
 plot(fmod3,MagnitudBlu3,'LineWidth',1.9)
 title(['Señal modulada del canal: ',num2str(titles(Channel(3),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
 %Filtro Pasa Bandas, BW=475Hz
-[num,den]=butter(N,[100 575]*2*pi,'bandpass','s'); %num y den son los coeficientes del numerador y denominador, en orden decreciente de un filtro Butterworth digital.
+[num,den]=butter(N,[500 975]*2*pi,'bandpass','s'); %num y den son los coeficientes del numerador y denominador, en orden decreciente de un filtro Butterworth digital.
 [num,den]=bilinear(num,den,Fm);
 BPF1=filter(num,den,Blue1);
 
-[num,den]=butter(N,[700 1175]*2*pi,'bandpass','s');
+[num,den]=butter(N,[1500 1975]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF2=filter(num,den,Blue2);
 
-[num,den]=butter(N,[1300 1775]*2*pi,'bandpass','s');
+[num,den]=butter(N,[2500 2975]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF3=filter(num,den,Blue3);
 
@@ -246,7 +249,7 @@ figure(5)
 set(gcf,'Name','Fourier Spectrum of modulated signal.')
 plot(f3,DimensionM,'m')
 title('Espectro de Fourier de la señal modulada.')
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
 %Reconstrucción%
 
@@ -288,15 +291,15 @@ set(gcf,'Name','Fourier Spectrum of demultiplexed signals with bandpass filters.
 subplot(3,1,1)
 plot(f4,Demo1,'LineWidth',1.9)
 title(['Señal demultiplexada del canal: ',num2str(titles(Channel(1),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 subplot(3,1,2)
 plot(f5,Demo2,'LineWidth',1.9)
 title(['Señal demultiplexada del canal: ',num2str(titles(Channel(2),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 subplot(3,1,3)
 plot(f6,Demo3,'LineWidth',1.9)
 title(['Señal demultiplexada del canal: ',num2str(titles(Channel(3),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
 %Demodulación de las señales
 DemoInf1=ssbdemod(BPFC1,Fp1,Fm);
@@ -315,19 +318,19 @@ set(gcf,'Name','Fourier Spectrum of demodulated signals.')
 subplot(3,1,1)
 plot(f7,DemoBLUE1,'LineWidth',1.9)
 title(['Señal demodulada del canal: ',num2str(titles(Channel(1),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 subplot(3,1,2)
 plot(f8,DemoBLUE2,'LineWidth',1.9)
 title(['Señal demodulada del canal: ',num2str(titles(Channel(2),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 subplot(3,1,3)
 plot(f9,DemoBLUE3,'LineWidth',1.9)
 title(['Señal demodulada del canal: ',num2str(titles(Channel(3),:))])
-xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
-demo1=resample(BPFC1,1,2); %Remuestrear nuevamente la señal a la mitad (original)
-demo2=resample(BPFC2,1,2);
-demo3=resample(BPFC3,1,2);
+demo1=resample(BPFC1,1,5); %Remuestrear nuevamente la señal a la mitad (original)
+demo2=resample(BPFC2,1,5);
+demo3=resample(BPFC3,1,5);
 
 t1=0:1/Fs:length(demo1)/Fs-1/Fs;
 t2=0:1/Fs:length(demo2)/Fs-1/Fs;
