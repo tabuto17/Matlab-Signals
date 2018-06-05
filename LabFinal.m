@@ -211,15 +211,15 @@ figure(4)
 set(gcf,'Name','Single Sideband Amplitude Modulation in Fourier Spectrum.')
 subplot(3,1,1)
 plot(fmod1,MagnitudBlu1,'LineWidth',1.9) %Linewidth: Ancho de la linea
-title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal modulada del canal: ',num2str(titles(Channel(1),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,2)
 plot(fmod2,MagnitudBlu2,'LineWidth',1.9)
-title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal modulada del canal: ',num2str(titles(Channel(2),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,3)
 plot(fmod3,MagnitudBlu3,'LineWidth',1.9)
-title(['Señal modulada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal modulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Filtro Pasa Bandas, BW=475Hz
@@ -286,15 +286,15 @@ figure(6)
 set(gcf,'Name','Fourier Spectrum of demultiplexed signals with bandpass filters.')
 subplot(3,1,1)
 plot(f4,Demo1,'LineWidth',1.9)
-title(['Señal demultiplexada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(1),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,2)
 plot(f5,Demo2,'LineWidth',1.9)
-title(['Señal demultiplexada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(2),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,3)
 plot(f6,Demo3,'LineWidth',1.9)
-title(['Señal demultiplexada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Demodulación de las señales
@@ -314,15 +314,15 @@ figure(7)
 set(gcf,'Name','Fourier Spectrum of demodulated signals.')
 subplot(3,1,1)
 plot(f7,DemoBLUE1,'LineWidth',1.9)
-title(['Señal demodulada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal demodulada del canal: ',num2str(titles(Channel(1),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,2)
 plot(f8,DemoBLUE2,'LineWidth',1.9)
-title(['Señal demodulada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal demodulada del canal: ',num2str(titles(Channel(2),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 subplot(3,1,3)
 plot(f9,DemoBLUE3,'LineWidth',1.9)
-title(['Señal demodulada del canal: ',num2str(titles(Channel(i),:))])
+title(['Señal demodulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 t1=0:1/Fs:length(DemoSup1)/Fs-1/Fs;
@@ -332,13 +332,13 @@ figure(8)
 set(gcf,'Name','Demodulated signals in time domain.')
 subplot(3,1,1)
 plot(t1,DemoSup1,'k')
-title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
+title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 subplot(3,1,2)
 plot(t2,DemoSup2,'k')
-title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
+title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 subplot(3,1,3)
 plot(t3,DemoSup3,'k')
-title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
+title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
