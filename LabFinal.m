@@ -186,15 +186,15 @@ for i=1:length(Channel)
 end
 
 %Modulación (La frecuencia de la portadora no puede ser mayor a la mitad de la frecuencia de muestreo)
-Fm=Fs*3; %Frecuencia de muestreo 6kHz
+Fm=Fs*2; %Frecuencia de muestreo 4kHz
 Fp1=600; %Frecuencia de portadora sn1
 Fp2=1200; %Frecuencia de portadora sn2
 Fp3=1800; %Frecuencia de portadora sn3
 
-%Remuestreo de la señal al triple (6000)
-Modu1=resample(PasaBandas(i,:),3,1);
-Modu2=resample(PasaBandas(i,:),3,1);
-Modu3=resample(PasaBandas(i,:),3,1);
+%Remuestreo de la señal al doble (4KHz)
+Modu1=resample(PasaBandas(1,:),2,1);
+Modu2=resample(PasaBandas(2,:),2,1);
+Modu3=resample(PasaBandas(3,:),2,1);
 
 %Modulación BLU-BLI
 Blue1=ssbmod(Modu1,Fp1,Fm); %No hay fase, por defecto se trabaja con la banda inferior
@@ -241,7 +241,7 @@ FourierM=fft(SM);
 LongitudM=length(SM);
 MagnitudM=abs(FourierM/LongitudM);
 DimensionM=MagnitudM(2:LongitudM/2).^2;
-f3=linspace(0,Fm,length(DimensionM));
+f3=linspace(0,Fm/2,length(DimensionM));
 figure(5)
 set(gcf,'Name','Fourier Spectrum of modulated signal.')
 plot(f3,DimensionM,'m')
@@ -298,15 +298,14 @@ title(['Señal demultiplexada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
 %Demodulación de las señales
-demo1=resample(BPFC1,3,1); %Remuestrear nuevamente la señal
-demo2=resample(BPFC2,3,1);
-demo3=resample(BPFC3,3,1);
-DemoSup1=ssbdemod(demo1,Fp1,Fm);
-DemoSup2=ssbdemod(demo2,Fp2,Fm);
-DemoSup3=ssbdemod(demo3,Fp3,Fm);
+DemoSup1=ssbdemod(BPFC1,Fp1,Fm);
+DemoSup2=ssbdemod(BPFC2,Fp2,Fm);
+DemoSup3=ssbdemod(BPFC3,Fp3,Fm);
+
 DemoBLUE1=abs(fft(DemoSup1));
 DemoBLUE2=abs(fft(DemoSup2));
 DemoBLUE3=abs(fft(DemoSup3));
+
 f7=linspace(0,Fm,length(DemoBLUE1));
 f8=linspace(0,Fm,length(DemoBLUE2));
 f9=linspace(0,Fm,length(DemoBLUE3));
@@ -324,6 +323,10 @@ subplot(3,1,3)
 plot(f9,DemoBLUE3,'LineWidth',1.9)
 title(['Señal demodulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+
+demo1=resample(BPFC1,2,1); %Remuestrear nuevamente la señal
+demo2=resample(BPFC2,2,1);
+demo3=resample(BPFC3,2,1);
 
 t1=0:1/Fs:length(DemoSup1)/Fs-1/Fs;
 t2=0:1/Fs:length(DemoSup2)/Fs-1/Fs;
