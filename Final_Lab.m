@@ -9,7 +9,7 @@ disp('Seleccione sujeto:')
 fprintf(Sujeto)
 Usuario=input(':','s');
 Fs=2000;
-N=2;  %Orden del Filtro
+N=3;  %Orden del Filtro
 
 switch Usuario
     case 'a' %Christian Gaviria
@@ -185,10 +185,10 @@ for i=1:length(Channel)
 end
 
 %Modulación (La frecuencia de la portadora no puede ser mayor a la mitad de la frecuencia de muestreo)
-Fm=Fs*5; %Frecuencia de muestreo 4kHz
-Fp1=600; %Frecuencia de portadora sn1
-Fp2=1200; %Frecuencia de portadora sn2
-Fp3=1800; %Frecuencia de portadora sn3
+Fm=Fs*5;    %Frecuencia de muestreo 4kHz
+Fp1=600;    %Frecuencia de portadora sn1
+Fp2=1200;   %Frecuencia de portadora sn2
+Fp3=1800;   %Frecuencia de portadora sn3
 
 %Remuestreo de la señal al doble (4KHz)
 Modu1=resample(PasaBandas(1,:),5,1);
@@ -239,8 +239,8 @@ SM=BPF1+BPF2+BPF3; % SM = Señal Multiplexada
 FourierM=fft(SM);
 LongitudM=length(SM);
 MagnitudM=abs(FourierM/LongitudM);
-DimensionM=MagnitudM(2:LongitudM/2).^2;
-f3=linspace(0,Fm/2,length(DimensionM));
+DimensionM=MagnitudM(2:LongitudM/4).^2;
+f3=linspace(0,Fm/4,length(DimensionM));
 figure(5)
 set(gcf,'Name','Fourier Spectrum of modulated signal.')
 plot(f3,DimensionM,'m')
@@ -327,20 +327,20 @@ demo1=resample(BPFC1,1,5); %Remuestrear nuevamente la señal
 demo2=resample(BPFC2,1,5);
 demo3=resample(BPFC3,1,5);
 
-t1=0:1/Fs:length(DemoInf1)/Fs-1/Fs;
-t2=0:1/Fs:length(DemoInf2)/Fs-1/Fs;
-t3=0:1/Fs:length(DemoInf3)/Fs-1/Fs;
+t1=0:1/Fs:length(demo1)/Fs-1/Fs;
+t2=0:1/Fs:length(demo2)/Fs-1/Fs;
+t3=0:1/Fs:length(demo3)/Fs-1/Fs;
 figure(8)
 set(gcf,'Name','Demodulated signals in time domain.')
 subplot(3,1,1)
-plot(t1,DemoInf1,'k')
+plot(t1,demo1,'k')
 title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 subplot(3,1,2)
-plot(t2,DemoInf2,'k')
+plot(t2,demo2,'k')
 title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
 subplot(3,1,3)
-plot(t3,DemoInf3,'k')
+plot(t3,demo3,'k')
 title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
