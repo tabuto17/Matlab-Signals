@@ -9,6 +9,7 @@ disp('Seleccione sujeto:')
 fprintf(Sujeto)
 Usuario=input(':','s');
 Fs=2000;
+N=2;  %Orden del Filtro
 
 switch Usuario
     case 'a' %Christian Gaviria
@@ -160,17 +161,13 @@ for i=1:length(Channel)
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
-    N=2;                 %Orden del Filtro
-    WnNotch=[55 69];     %Frecuencia de corte Filtro Notch
-    WnPass=[25 500];     %Frecuencia de corte Filtro Pasabanda
-    
     %Filtro Notch
-    [num,den]=butter(N,WnNotch*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
-    [num,den]=bilinear(num,den,Fs);
+    [num,den]=butter(N,[55 69]*2*pi,'stop','s');    %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
+    [num,den]=bilinear(num,den,Fs);                 %Frecuencia de corte Filtro Notch
     Notch(i,:)=filter(num,den,Tarea(i,:));
     
     %Filtro Pasa Bandas
-    [num,den]=butter(N,WnPass*2*pi,'bandpass','s'); %'5' es el orden
+    [num,den]=butter(N,[25 500]*2*pi,'bandpass','s'); %'5' es el orden %[25 500] Frecuencia de corte Filtro Pasabanda
     [num,den]=bilinear(num,den,Fs);
     PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro Pasa Bandas al Filtro Notch.
     
