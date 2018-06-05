@@ -5,9 +5,10 @@
 clc,clearvars,clear workspace, close all
 
 Sujeto=('a. Christian Gaviria\nb. Julian Castrillón\nc. Brahian Cortés\n');
-disp('Seleccione sujeto:'); fprintf(Sujeto)
+disp('Seleccione sujeto:')
+fprintf(Sujeto)
 Usuario=input(':','s');
-Fs=2000; Ts=1/Fs;
+Fs=2000;
 
 switch Usuario
     case 'a' %Christian Gaviria
@@ -60,9 +61,9 @@ if Prueba=='a' %Praxias
     Actividad=('a. Abrir boca\nb. Apretar dientes\nc. Tirar beso\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
-    Ocupacion=input(':','s');
+    Accion=input(':','s');
     
-    switch Ocupacion
+    switch Accion
         case 'a'
             ind=1; %indicador
         case 'b'
@@ -81,9 +82,9 @@ elseif Prueba=='b' %Fonendoscopio
     Actividad=('a. Yogur 3 mL\nb. Yogur 7 mL\nc. Saliva\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
-    Ocupacion=input(':','s');
+    Accion=input(':','s');
     
-    switch Ocupacion
+    switch Accion
         case 'a'
             ind=1; %indicador
         case 'b'
@@ -102,9 +103,9 @@ elseif Prueba=='c' %Deglución
     Actividad=('a. Agua 5 mL\nb. Agua 10 mL\nc. Agua 20 mL\nd. Saliva\ne. Yogur 3 mL\nf. Yogur 5 mL\ng. Yogur 7 mL\nh. Yogur 10 mL\ni. Yogur 20 mL\nj. Galleta\n');
     disp('Seleccione actividad:')
     fprintf(Actividad)
-    Ocupacion=input(':','s');
+    Accion=input(':','s');
     
-    switch Ocupacion
+    switch Accion
         case 'a'
             ind=1; %indicador
         case 'b'
@@ -133,206 +134,195 @@ elseif Prueba=='c' %Deglución
 end
 
 for i=1:length(Channel)
-    if Prueba=='b'
-        if Channel(i)==1
-            Div=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
-            Div=resample(Div,1,2);
-            Tarea(i,:)=Div;
-        else
-            Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
-        end
+    if Prueba=='b' && Channel(i)==1
+        Div=data(datastart(Channel(i),ind):dataend(Channel(i),ind));
+        Div=resample(Div,1,2);
+        Tarea(i,:)=Div;
     else
-        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind)); %Posición y selección de canales
-        
+        Tarea(i,:)=data(datastart(Channel(i),ind):dataend(Channel(i),ind));%Tarea(columna,fila)
     end
     
-    %%%%%%%%%%%%%%%%%%%%%_____SEÑAL-ORIGINAL_____%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    t=0:1/Fs:length(Tarea(i,:))/Fs-Ts;
-    figure(1)
-    set(gcf,'Name','Señales en el dominio del tiempo')
-    subplot(3,1,i)
-    plot(t,Tarea(i,:),'k')
-    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])%(fila,columna)
+    t=0:1/Fs:length(Tarea(i,:))/Fs-1/Fs;
+    figure(1); set(gcf,'Name','Signals in time domain.')
+    subplot(3,1,i); plot(t,Tarea(i,:),'k')
+    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))]) %(fila,columna)
     xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
     
-    %%%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fourier=fft(Tarea(i,:));
+    Longitud=length(Tarea(i,:)); %Se almacena toda longitud de la señal en una nueva variable
+    Magnitud=abs(Fourier/Longitud);
+    Dimension=Magnitud(2:Longitud/2).^2; %Es necesario elevarlo al cuadrado por FFT, longitud/2 realiza un zoom
+    f1=linspace(0,Fs/2,length(Dimension));
+    figure(2); set(gcf,'Name','Signals in frequency domain.')
+    subplot(3,1,i); plot(f1,Dimension,'b')
+    title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
+    xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
-    %Numeral 4
-    L=length(Tarea(i,:)); %Longitud de la señal
-    Z=fft(Tarea(i,:));
-    Mag=abs (Z/L);
-    Mag2=Mag(2:L/2).^2;
-    f=linspace(0,Fs/2,length(Mag2));
-    figure(2); set(gcf,'Name','Señales con su espectro de Fourier')
-    subplot(3,1,i); plot(f,Mag2,'b')
-    title(['Espectro original de Fourier Señal: ',num2str(titles(Channel(i),:))])%(fila,columna)
-    
-    %%%%%%%%%%%%%%%%%%%%%_____FILTRO-NOTCH_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    [num,den]=butter(2,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace y de un filtro continuo
+    %Filtro Notch
+    [num,den]=butter(2,[55 69]*2*pi,'stop','s'); %Rad/seg para que lo retorne al dominio de la transformada de laplace, Filtro Rechaza Bandas
     [num,den]=bilinear(num,den,Fs);
-    df1(i,:)=filter(num,den,Tarea(i,:));
+    Notch(i,:)=filter(num,den,Tarea(i,:));
     
-    %%%%%%%%%%%%%%%%%%%_____FILTRO-PASABANDA_____%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    [num,den]=butter(2,[25 500]*2*pi,'bandpass','s'); %Compara sl stream que esta entre apostrofes
+    %Filtro Pasa Bandas
+    [num,den]=butter(2,[25 500]*2*pi,'bandpass','s'); %'5' es el orden
     [num,den]=bilinear(num,den,Fs);
-    df2(i,:)=filter(num,den,df1(i,:)); %Filtro pasabanda al filtro notch
+    PasaBandas(i,:)=filter(num,den,Notch(i,:)); %Filtro Pasa Bandas al Filtro Notch.
     
-    %%%%%%%%%%%%%%%%%%%%%%%_____FOURIER_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %Numeral 5 Espectro de fourier de las señales filtradas
-    Ln=length(df2(i,:));
-    Zn=fft(df2(i,:));
-    Magn=abs(Zn/Ln);
-    Mag2n=Magn(2:Ln/2).^2; %Vector tiempo
-    fn=linspace(0,Fs/2,length(Mag2n));
-    figure(3); set(gcf,'Name','Señales filtradas con su espectro de Fourier')
-    subplot(3,1,i)
-    plot(fn,Mag2n,'r'); title(['Espectro de Fourier Señal filtrada: ',num2str(titles(Channel(i),:))])%(fila,columna)
+    fourier=fft(PasaBandas(i,:));
+    longitud=length(PasaBandas(i,:));
+    magnitud=abs(fourier/longitud);
+    dimension=magnitud(2:longitud/2).^2;
+    f2=linspace(0,Fs/2,length(dimension));
+    figure(3); set(gcf,'Name','Filtered signals in Fourier Spectrum.')
+    subplot(3,1,i); plot(f2,dimension,'r')
+    title(['Señal filtrada del canal: ',num2str(titles(Channel(i),:))])
+    xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
 end
 
+%Modulación (La frecuencia de la portadora no puede ser mayor a la mitad de la frecuencia de muestreo)
+Fm=Fs*3; %Frecuencia de muestreo 6kHz
+Fp1=600; %Frecuencia de portadora sn1
+Fp2=1200; %Frecuencia de portadora sn2
+Fp3=1800; %Frecuencia de portadora sn3
 
-%%%%%%%%%%%%%%%%%%%%%%%_____MODULACION_____%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    Fmu= Fs*3;   %Frecuencia muestreo 6kHz
-    Fp1= 600;    %Frecuencia portadora sn1
-    Fp2= 1200;   %Frecuencia portadora sn2
-    Fp3= 1800;   %Frecuencia portadora sn3
-    
-%Remuestreamos la señal al triple 6000
+%Remuestreo de la señal al triple (6000)
+Modu1=resample(PasaBandas(1,:),3,1);
+Modu2=resample(PasaBandas(2,:),3,1);
+Modu3=resample(PasaBandas(3,:),3,1);
 
-mod_1=resample(df2(1,:),3,1);
-mod_2=resample(df2(2,:),3,1);
-mod_3=resample(df2(3,:),3,1);
+%Modulación BLU-BLI
+Blue1=ssbmod(Modu1,Fp1,Fm); %No hay fase, por defecto se trabaja con la banda inferior
+Blue2=ssbmod(Modu2,Fp2,Fm);
+Blue3=ssbmod(Modu3,Fp3,Fm);
 
-%Modulacion BLU Banda lateral inferior
+MagnitudBlu1=abs(fft(Blue1));
+MagnitudBlu2=abs(fft(Blue2));
+MagnitudBlu3=abs(fft(Blue3));
+fmod1=linspace(0,Fm,length(MagnitudBlu1));
+fmod2=linspace(0,Fm,length(MagnitudBlu2));
+fmod3=linspace(0,Fm,length(MagnitudBlu3));
+figure(4); set(gcf,'Name','Single Sideband Amplitude Modulation in Fourier Spectrum.')
+subplot(3,1,1); plot(fmod1,MagnitudBlu1,'LineWidth',1.9) %Linewidth: Ancho de la linea
+title(['Señal modulada del canal: ',num2str(titles(Channel(1),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,2); plot(fmod2,MagnitudBlu2,'LineWidth',1.9)
+title(['Señal modulada del canal: ',num2str(titles(Channel(2),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,3); plot(fmod3,MagnitudBlu3,'LineWidth',1.9)
+title(['Señal modulada del canal: ',num2str(titles(Channel(3),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
-mod_sup1 = ssbmod(mod_1,Fp1,Fmu);
-mod_sup2 = ssbmod(mod_2,Fp2,Fmu);
-mod_sup3 = ssbmod(mod_3,Fp3,Fmu);
-
-%Espectro de Fourier
-magblu1= abs(fft(mod_sup1));
-magblu2= abs(fft(mod_sup2));
-magblu3= abs(fft(mod_sup3));
-fmod1=linspace(0,Fmu,length(magblu1));
-fmod2=linspace(0,Fmu,length(magblu2));
-fmod3=linspace(0,Fmu,length(magblu3));
-%Numeral 6 espectro de fourier de las señales moduladas
-figure(4); set(gcf,'Name','Señales Moduladas BLU - Espectro de Fourier')
-subplot(3,1,1); plot(fmod1,magblu1,'LineWidth',2.2,'color','b')
-subplot(3,1,2); plot(fmod2,magblu2,'LineWidth',2.2,'color','r')
-subplot(3,1,3); plot(fmod3,magblu3,'LineWidth',2.2,'color','m')
-
-%FILTROS PASABANDA
-
+%Filtro Pasa Bandas, BW=475Hz
 [num,den]=butter(2,[100 575]*2*pi,'bandpass','s');
-[num,den]=bilinear(num,den,Fmu);
-sf1=filter(num,den,mod_sup1);
+[num,den]=bilinear(num,den,Fm);
+BPF1=filter(num,den,Blue1);
 
 [num,den]=butter(2,[700 1175]*2*pi,'bandpass','s');
-[num,den]=bilinear(num,den,Fmu);
-sf2=filter(num,den,mod_sup2);
+[num,den]=bilinear(num,den,Fm);
+BPF2=filter(num,den,Blue2);
 
 [num,den]=butter(2,[1300 1775]*2*pi,'bandpass','s');
-[num,den]=bilinear(num,den,Fmu);
-sf3=filter(num,den,mod_sup3);
+[num,den]=bilinear(num,den,Fm);
+BPF3=filter(num,den,Blue3);
 
+%Multiplexación
+SM=BPF1+BPF2+BPF3; % SM = Señal Multiplexada
+FourierM=fft(SM);
+LongitudM=length(SM);
+MagnitudM=abs(FourierM/LongitudM);
+DimensionM=MagnitudM(2:LongitudM/2).^2;
+f3=linspace(0,Fm/2,length(DimensionM));
+figure(5); set(gcf,'Name','Fourier Spectrum of modulated signal.')
+plot(f3,DimensionM,'m'); title('Espectro de Fourier de la señal modulada')
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
-%Multiplexacion
-%Numeral 7 Espectro de fourier de la señal modulada que viaja por el medio
+%Reconstrucción%
 
-SM=sf1+sf2+sf3; % SM ES LA SEÑAL MULTIPLEXADA
-LM=length(SM); ZM=fft(SM);
-MagLM=abs(ZM/LM); Mag2LM=MagLM(2:LM/3).^2; %Vector tiempo
-Fsm=linspace(0,Fmu/3,length(Mag2LM));
-figure(5); set(gcf,'Name','Señal Multiplexada: Completa Modulada')
-plot(Fsm,Mag2LM,'r'); title('Espectro de Fourier Señal Modulada')
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%RECONSTRUCCION
-
-%FILTROS PASABANDA
-
+%Filtro Pasa Bandas DEMUX
 [num,den]=butter(2,[100 575]*2*pi,'bandpass','s');
-[num,den]=bilinear(num,den,Fmu);
-SF1=filter(num,den,SM);
+[num,den]=bilinear(num,den,Fm);
+bpf1=filter(num,den,SM);
 
 [num,den]=butter(2,[700 1175]*2*pi,'bandpass','s');
-[num,den]=bilinear(num,den,Fmu);
-SF2=filter(num,den,SM);
+[num,den]=bilinear(num,den,Fm);
+bpf2=filter(num,den,SM);
 
 [num,den]=butter(2,[1300 1775]*2*pi,'bandpass','s');
-[num,den]=bilinear(num,den,Fmu);
-SF3=filter(num,den,SM);
+[num,den]=bilinear(num,den,Fm);
+bpf3=filter(num,den,SM);
 
-%FILTROS PASABAJAS/ELIMINAR PORTADORA
-
+%Filtro Pasa Bajas para eliminar la portadora
 [num,den]=butter(2,Fp1*2*pi,'low','s');
-[num,den]=bilinear(num,den,Fmu);
-SF1_=filter(num,den,SF1);
+[num,den]=bilinear(num,den,Fm);
+BPFC1=filter(num,den,bpf1); %BPFP1 = BandPass Filter Carrier 1
 
 [num,den]=butter(2,Fp2*2*pi,'low','s');
-[num,den]=bilinear(num,den,Fmu);
-SF2_=filter(num,den,SF2);
+[num,den]=bilinear(num,den,Fm);
+BPFC2=filter(num,den,bpf2);
 
 [num,den]=butter(2,Fp3*2*pi,'low','s');
-[num,den]=bilinear(num,den,Fmu);
-SF3_=filter(num,den,SF3);
+[num,den]=bilinear(num,den,Fm);
+BPFC3=filter(num,den,bpf3);
 
-Demu1= abs(fft(SF1_));
-Demu2= abs(fft(SF2_));
-Demu3= abs(fft(SF3_));
+Demo1=abs(fft(BPFC1));
+Demo2=abs(fft(BPFC2));
+Demo3=abs(fft(BPFC3));
+f4=linspace(0,Fm,length(Demo1));
+f5=linspace(0,Fm,length(Demo2));
+f6=linspace(0,Fm,length(Demo3));
 
-Demut1=linspace(0,Fmu,length(Demu1));
-Demut2=linspace(0,Fmu,length(Demu2));
-Demut3=linspace(0,Fmu,length(Demu3));
+figure(6); set(gcf,'Name','Fourier Spectrum of demultiplexed signals with bandpass filters.')
+subplot(3,1,1); plot(f4,Demo1,'LineWidth',1.9)
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(1),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,2); plot(f5,Demo2,'LineWidth',1.9)
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(2),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,3); plot(f6,Demo3,'LineWidth',1.9)
+title(['Señal demultiplexada del canal: ',num2str(titles(Channel(3),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
-%Numeral 8 Señales demultiplexadas con los filtros pasabandas
-figure(6); set(gcf,'Name','Señales Demultiplexadas con Filtros Pasabandas')
-subplot(3,1,1); plot(Demut1,Demu1,'LineWidth',2.2,'color','b')
-subplot(3,1,2); plot(Demut2,Demu2,'LineWidth',2.2,'color','c')
-subplot(3,1,3); plot(Demut3,Demu3,'LineWidth',2.2,'color','g')
+%Demodulación de las señales
+DemoSup1=ssbdemod(BPFC1,Fp1,Fm);
+DemoSup2=ssbdemod(BPFC2,Fp2,Fm);
+DemoSup3=ssbdemod(BPFC3,Fp3,Fm);
 
-%DEMODULACION DE LAS SEÑALES
+DemoBLUE1=abs(fft(DemoSup1));
+DemoBLUE2=abs(fft(DemoSup2));
+DemoBLUE3=abs(fft(DemoSup3));
+f7=linspace(0,Fm,length(DemoBLUE1));
+f8=linspace(0,Fm,length(DemoBLUE2));
+f9=linspace(0,Fm,length(DemoBLUE3));
 
-%Remuestreamos la señal nuevamente
-demod_1=resample(SF1_,1,3);
-demod_2=resample(SF2_,1,3);
-demod_3=resample(SF3_,1,3);
+figure(7); set(gcf,'Name','Fourier Spectrum of demodulated signals.')
+subplot(3,1,1); plot(f7,DemoBLUE1,'LineWidth',1.9)
+title(['Señal demodulada del canal: ',num2str(titles(Channel(1),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,2); plot(f8,DemoBLUE2,'LineWidth',1.9)
+title(['Señal demodulada del canal: ',num2str(titles(Channel(2),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
+subplot(3,1,3); plot(f9,DemoBLUE3,'LineWidth',1.9)
+title(['Señal demodulada del canal: ',num2str(titles(Channel(3),:))])
+xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
-demod_sup1 = ssbdemod(demod_1,Fp1,Fmu);
-demod_sup2 = ssbdemod(demod_2,Fp2,Fmu);
-demod_sup3 = ssbdemod(demod_3,Fp3,Fmu);
 
-demagblu1= abs(fft(demod_sup1));
-demagblu2= abs(fft(demod_sup2));
-demagblu3= abs(fft(demod_sup3));
+demo1=resample(DemoSup1,1,3); %Remuestrear nuevamente la señal
+demo2=resample(DemoSup2,1,3);
+demo3=resample(DemoSup3,1,3);
 
-defmod1=linspace(0,Fmu,length(demagblu1));
-defmod2=linspace(0,Fmu,length(demagblu2));
-defmod3=linspace(0,Fmu,length(demagblu3));
+t1=0:1/Fs:length(demo1)/Fs-1/Fs;
+t2=0:1/Fs:length(demo2)/Fs-1/Fs;
+t3=0:1/Fs:length(demo3)/Fs-1/Fs;
 
-%Numeral 9 Señales demuduladas
-figure(7); set(gcf,'Name','Señales Demoduladas con su espectro de Fourier')
-subplot(3,1,1); plot(defmod1,demagblu1,'LineWidth',2.2)
-subplot(3,1,2); plot(defmod2,demagblu2,'LineWidth',2.2)
-subplot(3,1,3); plot(defmod3,demagblu3,'LineWidth',2.2)
-
-%Numeral 10 Señales demoduladas en el dominio del tiempo
-tdem1=0:1/Fs:length(demod_sup1)/Fs-1/Fs;
-tdem2=0:1/Fs:length(demod_sup2)/Fs-1/Fs;
-tdem3=0:1/Fs:length(demod_sup3)/Fs-1/Fs;
-
-figure(8); set(gcf,'Name','Señales demoduladas en el dominio del tiempo')
-subplot(3,1,1); plot(tdem1,demod_sup1,'k')
+figure(8); set(gcf,'Name','Demodulated signals in time domain.')
+subplot(3,1,1); plot(t1,demo1,'k')
+title(['El canal utilizado es: ',num2str(titles(Channel(1),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-subplot(3,1,2); plot(tdem2,demod_sup2,'k')
+subplot(3,1,2); plot(t2,demo2,'k')
+title(['El canal utilizado es: ',num2str(titles(Channel(2),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-subplot(3,1,3); plot(tdem3,demod_sup3,'k')
+subplot(3,1,3); plot(t3,demo3,'k')
+title(['El canal utilizado es: ',num2str(titles(Channel(3),:))])
 xlabel 'Tiempo [s]', ylabel 'Amplitud [V]', axis tight, grid on
-
 
