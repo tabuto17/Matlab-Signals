@@ -160,7 +160,7 @@ for i=1:length(Channel)
     title(['El canal utilizado es: ',num2str(titles(Channel(i),:))])
     xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
     
-    N=3;                 %Orden del Filtro
+    N=2;                 %Orden del Filtro
     WnNotch=[55 69];     %Frecuencia de corte Filtro Notch
     WnPass=[25 500];     %Frecuencia de corte Filtro Pasabanda
     
@@ -188,15 +188,15 @@ for i=1:length(Channel)
 end
 
 %Modulación (La frecuencia de la portadora no puede ser mayor a la mitad de la frecuencia de muestreo)
-Fm=Fs*2; %Frecuencia de muestreo 4kHz
+Fm=Fs*5; %Frecuencia de muestreo 4kHz
 Fp1=600; %Frecuencia de portadora sn1
 Fp2=1200; %Frecuencia de portadora sn2
 Fp3=1800; %Frecuencia de portadora sn3
 
 %Remuestreo de la señal al doble (4KHz)
-Modu1=resample(PasaBandas(1,:),2,1);
-Modu2=resample(PasaBandas(2,:),2,1);
-Modu3=resample(PasaBandas(3,:),2,1);
+Modu1=resample(PasaBandas(1,:),5,1);
+Modu2=resample(PasaBandas(2,:),5,1);
+Modu3=resample(PasaBandas(3,:),5,1);
 
 %Modulación BLU-BLI
 Blue1=ssbmod(Modu1,Fp1,Fm); %No hay fase, por defecto se trabaja con la banda inferior
@@ -326,9 +326,9 @@ plot(f9,DemoBLUE3,'LineWidth',1.9)
 title(['Señal demodulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Amplitud [dB]', axis tight, grid on
 
-demo1=resample(BPFC1,2,1); %Remuestrear nuevamente la señal
-demo2=resample(BPFC2,2,1);
-demo3=resample(BPFC3,2,1);
+demo1=resample(BPFC1,1,5); %Remuestrear nuevamente la señal
+demo2=resample(BPFC2,1,5);
+demo3=resample(BPFC3,1,5);
 
 t1=0:1/Fs:length(DemoInf1)/Fs-1/Fs;
 t2=0:1/Fs:length(DemoInf2)/Fs-1/Fs;
