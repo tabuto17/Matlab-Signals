@@ -188,15 +188,15 @@ for i=1:length(Channel)
 end
 
 %Modulación (La frecuencia de la portadora no puede ser mayor a la mitad de la frecuencia de muestreo)
-Fm=Fs*5; %Frecuencia de muestreo=4kHz
-Fp1=1000; %Frecuencia de portadora 1
-Fp2=2000; %Frecuencia de portadora 2
-Fp3=3000; %Frecuencia de portadora 3
+Fm=Fs*3; %Frecuencia de muestreo=4kHz
+Fp1=600; %Frecuencia de portadora 1
+Fp2=1200; %Frecuencia de portadora 2
+Fp3=1800; %Frecuencia de portadora 3
 
 %Remuestreo de la señal al doble (4KHz)
-Modu1=resample(PasaBandas(1,:),5,1);
-Modu2=resample(PasaBandas(2,:),5,1);
-Modu3=resample(PasaBandas(3,:),5,1);
+Modu1=resample(PasaBandas(1,:),3,1);
+Modu2=resample(PasaBandas(2,:),3,1);
+Modu3=resample(PasaBandas(3,:),3,1);
 
 %Modulación BLU-BLI
 Blue1=ssbmod(Modu1,Fp1,Fm); %No hay fase, por defecto se trabaja con la banda inferior
@@ -226,15 +226,15 @@ title(['Señal modulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
 %Filtro Pasa Bandas, BW=475Hz
-[num,den]=butter(N,[500 975]*2*pi,'bandpass','s'); %num y den son los coeficientes del numerador y denominador, en orden decreciente de un filtro Butterworth digital.
+[num,den]=butter(N,[100 575]*2*pi,'bandpass','s'); %num y den son los coeficientes del numerador y denominador, en orden decreciente de un filtro Butterworth digital.
 [num,den]=bilinear(num,den,Fm);
 BPF1=filter(num,den,Blue1);
 
-[num,den]=butter(N,[1500 1975]*2*pi,'bandpass','s');
+[num,den]=butter(N,[700 1175]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF2=filter(num,den,Blue2);
 
-[num,den]=butter(N,[2500 2975]*2*pi,'bandpass','s');
+[num,den]=butter(N,[1300 1775]*2*pi,'bandpass','s');
 [num,den]=bilinear(num,den,Fm);
 BPF3=filter(num,den,Blue3);
 
@@ -266,22 +266,9 @@ BPF2=filter(num,den,SM);
 [num,den]=bilinear(num,den,Fm);
 BPF3=filter(num,den,SM);
 
-%Filtro Pasa Bajas para eliminar la portadora
-[num,den]=butter(N,Fp1*2*pi,'low','s');
-[num,den]=bilinear(num,den,Fm);
-BPFC1=filter(num,den,BPF1); %BPFC1 = BandPass Filter Carrier 1
-
-[num,den]=butter(N,Fp2*2*pi,'low','s');
-[num,den]=bilinear(num,den,Fm);
-BPFC2=filter(num,den,BPF2);
-
-[num,den]=butter(N,Fp3*2*pi,'low','s');
-[num,den]=bilinear(num,den,Fm);
-BPFC3=filter(num,den,BPF3);
-
-Demo1=abs(fft(BPFC1));
-Demo2=abs(fft(BPFC2));
-Demo3=abs(fft(BPFC3));
+Demo1=abs(fft(BPF1));
+Demo2=abs(fft(BPF2));
+Demo3=abs(fft(BPF3));
 
 f4=linspace(0,Fm,length(Demo1));
 f5=linspace(0,Fm,length(Demo2));
@@ -302,9 +289,9 @@ title(['Señal demultiplexada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
 %Demodulación de las señales
-DemoInf1=ssbdemod(BPFC1,Fp1,Fm);
-DemoInf2=ssbdemod(BPFC2,Fp2,Fm);
-DemoInf3=ssbdemod(BPFC3,Fp3,Fm);
+DemoInf1=ssbdemod(BPF1,Fp1,Fm);
+DemoInf2=ssbdemod(BPF2,Fp2,Fm);
+DemoInf3=ssbdemod(BPF3,Fp3,Fm);
 
 DemoBLUE1=abs(fft(DemoInf1));
 DemoBLUE2=abs(fft(DemoInf2));
@@ -328,9 +315,9 @@ plot(f9,DemoBLUE3,'LineWidth',1.9)
 title(['Señal demodulada del canal: ',num2str(titles(Channel(3),:))])
 xlabel 'Frecuencia [Hz]', ylabel 'Densidad espectral de energía', axis tight, grid on
 
-demo1=resample(BPFC1,1,5); %Remuestrear nuevamente la señal a la mitad (original)
-demo2=resample(BPFC2,1,5);
-demo3=resample(BPFC3,1,5);
+demo1=resample(BPF1,1,3); %Remuestrear nuevamente la señal a la mitad (original)
+demo2=resample(BPF2,1,3);
+demo3=resample(BPF3,1,3);
 
 t1=0:1/Fs:length(demo1)/Fs-1/Fs;
 t2=0:1/Fs:length(demo2)/Fs-1/Fs;
