@@ -1,4 +1,5 @@
 %% Brahian Cortes       - 1020440471
+
 clearvars, clc, close all;
 syms x(n) y(n); %Variables simbólicas
 nHz = input('Ingrese vector [bm ... b1 b0]: '); l_n=length(nHz);% Ingreso vector polinomio del numerador (bi)
