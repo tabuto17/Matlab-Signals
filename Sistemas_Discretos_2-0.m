@@ -10,11 +10,6 @@ a=fliplr(dHz);                                                  % Variable para 
 xn = input('Ingrese la señal de entrada aleatoria: ');          % Señal de entrada x(n) en forma de vector de datos
 Ts = input('Ingresar periodo de muestreo en segundos: ');       % Periodo de muestreo (T)
 
-%% Dinámicos
-
-N=length(xn); n_1=0:N-1;                                        % Numero de muestras N de la señal x[n] y contador de tiempo
-nT=n_1*Ts; Fs=1./nT;                                            % Timepo variable en segundos nT y Frecuencia de muestreo Fs 
-
 %% Ecuación de diferencias 
 
 EqY = 0;   EqX = 0;                                              % Vector vacio
@@ -53,13 +48,12 @@ elseif (Ine < 1)
 end
 
 %% Respuesta al impulso 
-syms z;                                             % Variable simbolica z para definir el numerador y denominador de H(z)
-Hznum = poly2sym(nHz,z); Hzden=poly2sym(dHz,z);     % Polinomio del numerador de Función de Transferencia
-Hz = Hznum/Hzden;                                   % Funcion de Transferencia H(z)
-iHz = iztrans(Hz,n_1); hn = double(iHz);            % Inversa de H(z) con el contador de tiempo y parte real (comando double)
-subplot(322), stem(nT,real(hn),'r','LineWidth',1),...
-    grid minor, xlabel 'Tiempo [s]', ylabel 'h[n]',...
-    title 'Respuesta al Impulso h[n]'
+N=length(xn); n_1=0:N-1;                                        % Numero de muestras N de la señal x[n] y contador de tiempo
+nT=n_1*Ts; Fs=1./nT;                                            % Timepo variable en segundos nT y Frecuencia de muestreo Fs 
+h_imp = impz(nHz, dHz, N, 1/Ts);
+subplot(322),stem(nT,h_imp,'k','LineWidth',2'),title('Respuesta al impulso'),xlabel('Tiempo [s]'),...
+    ylabel('h[n]'),grid('minor')
+
 %% Señal de Entrada (Aleatoria)
 subplot(324), stem(nT,xn,'g','LineWidth',1),...
     grid minor, xlabel 'Tiempo [s]',...
@@ -70,13 +64,13 @@ subplot(326), stem(nT,yn,'m','LineWidth',1),...
     grid minor, xlabel 'Tiempo [s]',...
     ylabel 'y[n]', title 'Respuesta de Estado Cero y[n]'
 %% Respuesta en Frecuencia
-w = linspace(-pi,pi,N); wnorm=w/(2*pi);                 % Frecuencia digital en radianes (Rad) y Normalizada (Ciclos/Muestra)                                  
-wlin = (wnorm.*Fs)/2*pi;                                % Frecuencia Lineal (Hz)
-Hw = (polyval(nHz,exp(1i*w))./polyval(dHz,exp(1i*w)));  % DTFT de H[n]
-ESDh = abs(Hw).^2;                                      % ESD de h[n]
 figure (2)
-stem(wlin,20*log10(ESDh), 'b','LineWidth',2) , title('Densidad Espectral de Energia de h[n]'),...
-    xlabel('Frecuencia (Hz)'), ylabel('|H(\omega)|_{Hz}'),...
-    grid minor, axis tight
-
-
+plot(freqz(nHz,dHz,N))
+%w = linspace(-pi,pi,N); wnorm=w/(2*pi);                 % Frecuencia digital en radianes (Rad) y Normalizada (Ciclos/Muestra)                                  
+%wlin = (wnorm.*Fs)/2*pi;                                % Frecuencia Lineal (Hz)
+%Hw = (polyval(nHz,exp(1i*w))./polyval(dHz,exp(1i*w)));  % DTFT de H[n]
+%ESDh = abs(Hw).^2;                                      % ESD de h[n]
+%figure (2)
+%stem(wlin,20*log10(ESDh), 'b','LineWidth',2) , title('Densidad Espectral de Energia de h[n]'),...
+%    xlabel('Frecuencia (Hz)'), ylabel('|H(\omega)|_{Hz}'),...
+%    grid minor, axis tight
